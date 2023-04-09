@@ -32,6 +32,45 @@ Scene::~Scene()
     delete m_bvh;
 }
 
+bool Scene::load(QString filename, Scene **scenePointer)
+{
+    CS123XmlSceneParser parser(filename.toStdString());
+    if(!parser.parse()) {
+        return false;
+    }
+    CS123SceneCameraData cameraData;
+    parser.getCameraData(cameraData);
+    BasicCamera camera(cameraData.pos.head<3>(),
+                       cameraData.look.head<3>(),
+                       cameraData.up.head<3>(),
+                       cameraData.heightAngle,
+                       (float)IMAGE_WIDTH / (float)IMAGE_HEIGHT);
+    Scene *scene = new Scene;
+    scene->setCamera(camera);
+
+    CS123SceneGlobalData globalData;
+    parser.getGlobalData(globalData);
+
+
+    scene->setGlobalData(globalData);
+
+    CS123SceneLightData lightData;
+    for(int i = 0, size = parser.getNumLights(); i < size; ++i) {
+        parser.getLightData(i, lightData);
+        scene->addLight(lightData);
+    }
+
+    QFileInfo info(filename);
+    QString dir = info.path();
+    CS123SceneNode *root = parser.getRootNode();
+    if(!parseTree(root, scene, dir.toStdString() + "/")) {
+        return false;
+    }
+
+    *scenePointer = scene;
+    return true;
+}
+
 bool Scene::load(QString filename, Scene **scenePointer, int cnt)
 {
     CS123XmlSceneParser parser(filename.toStdString(), cnt);

@@ -18,6 +18,17 @@
 #define UNSUPPORTED_ELEMENT(e) std::cout << ERROR_AT(e) << "unsupported element <" \
     << e.tagName().toStdString() << ">" << std::endl;
 
+CS123XmlSceneParser::CS123XmlSceneParser(const std::string& name)
+{
+    file_name = name;
+
+    memset(&m_cameraData, 0, sizeof(CS123SceneCameraData));
+    memset(&m_globalData, 0, sizeof(CS123SceneGlobalData));
+    m_objects.clear();
+    m_lights.clear();
+    m_nodes.clear();
+}
+
 CS123XmlSceneParser::CS123XmlSceneParser(const std::string& name, int _cnt)
 {
     file_name = name;
@@ -707,8 +718,12 @@ bool CS123XmlSceneParser::parsePrimitive(const QDomElement &prim, CS123SceneNode
         if (prim.hasAttribute("meshfile")) {
             primitive->meshfile = prim.attribute("meshfile").toStdString();
         } else if (prim.hasAttribute("filename")) {
-            primitive->meshfile = prim.attribute("filename").toStdString() + "-" + std::to_string(cnt) + ".obj";
-            cnt += 1;
+            if(cnt >= 0) {
+                primitive->meshfile = prim.attribute("filename").toStdString() + "-" + std::to_string(cnt) + ".obj";
+                cnt += 1;
+            } else {
+                primitive->meshfile = prim.attribute("filename").toStdString() + ".obj";
+            }
         } else {
             std::cout << "mesh object must specify filename" << std::endl;
             return false;

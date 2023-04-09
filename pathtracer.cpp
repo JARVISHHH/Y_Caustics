@@ -106,10 +106,11 @@ Vector3f PathTracer::traceRayWithPhotonMapping(const Ray& r, const Scene& scene,
         const tinyobj::material_t& mat = t->getMaterial();//Get the material of the triangle from the mesh
         std::shared_ptr<Material> obj = std::make_shared<Lambertian>(mat);
 
-        selectMaterial(mat, obj);
+        selectMaterial(mat, obj);  // Decide the material that the ray hit
 
         double factor = 1.0;
 
+        // Get the triangle normal
         Vector3f n = i.object->getNormal(i);
         n = n.dot(ray.d) < 0 ? n : -n;
 
@@ -117,19 +118,20 @@ Vector3f PathTracer::traceRayWithPhotonMapping(const Ray& r, const Scene& scene,
         LightSampler sampler;
         Vector3f sampleColor(0, 0, 0);
 
+        // Direct lighting
         for (auto light: scene.getEmissives()) {
             Vector3f lightColor = sampler.sampleDirect(ray, i, light, scene, scatteredLight);
             Vector3f objColor = obj->sampleBRDF(ray.d, n, scatteredLight.d) * obj->getDiffuseColor();
             sampleColor += piecewiseMul(lightColor, objColor);
         }
-
+        // Self-emitting radiance
         if (countEmitted) {
             sampleColor += obj->getEmissiveColor();
         }
 
+        // russian roulette
         if (depth >= 10) {
             //return sampleColor;
-            // russian roulette
             double continue_probability = obj->m_maxRadiance;
             if (random_double(0.0, 1.0) >= continue_probability) {
                 return sampleColor;
@@ -189,7 +191,6 @@ Vector3f PathTracer::traceRayWithPathTracing(const Ray& r, const Scene& scene, i
             Vector3f objColor = obj->sampleBRDF(ray.d, n, scatteredLight.d) * obj->getDiffuseColor();
             sampleColor += piecewiseMul(lightColor, objColor);
         }
-
 
         if (countEmitted) {
             sampleColor += obj->getEmissiveColor();

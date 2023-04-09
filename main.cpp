@@ -31,7 +31,7 @@ int main(int argc, char *argv[])
     QString scenefile = args[0];
     QString output = args[1];
 
-    bool usePhotonMapping = false;
+    bool usePhotonMapping = true;
     int samplePerPixel = 10;
     bool defocusBlurOn = false;
     bool useOrenNayerBRDF = false;
@@ -39,35 +39,31 @@ int main(int argc, char *argv[])
 
     QImage image(IMAGE_WIDTH, IMAGE_HEIGHT, QImage::Format_RGB32);
 
-    for (int i = 524; i < 525; ++i) {
+    Scene *scene;
+    if(!Scene::load(scenefile, &scene)) {
+        std::cerr << "Error parsing scene file " << scenefile.toStdString() << std::endl;
+        a.exit(1);
+        return 1;
+    }
 
 
-        Scene *scene;
-        if(!Scene::load(scenefile, &scene, i)) {
-            std::cerr << "Error parsing scene file " << scenefile.toStdString() << std::endl;
-            a.exit(1);
-            return 1;
-        }
+    PathTracer tracer(IMAGE_WIDTH, IMAGE_HEIGHT, usePhotonMapping, samplePerPixel, defocusBlurOn, useOrenNayerBRDF, importanceSampling);
 
+    QRgb *data = reinterpret_cast<QRgb *>(image.bits());
 
-        PathTracer tracer(IMAGE_WIDTH, IMAGE_HEIGHT, usePhotonMapping, samplePerPixel, defocusBlurOn, useOrenNayerBRDF, importanceSampling);
+    tracer.traceScene(data, *scene);
+    delete scene;
 
-        QRgb *data = reinterpret_cast<QRgb *>(image.bits());
+    std::string path = output.toStdString() + ".png";
 
-        tracer.traceScene(data, *scene);
-        delete scene;
-
-        std::string path = output.toStdString() + "-" + std::to_string(i) + ".png";
-
-        bool success = image.save(QString::fromStdString(path));
-        if(!success) {
-            success = image.save(output, "PNG");
-        }
-        if(success) {
-            std::cout << "Wrote rendered image to " << output.toStdString() << std::endl;
-        } else {
-            std::cerr << "Error: failed to write image to " << output.toStdString() << std::endl;
-        }
+    bool success = image.save(QString::fromStdString(path));
+    if(!success) {
+        success = image.save(output, "PNG");
+    }
+    if(success) {
+        std::cout << "Wrote rendered image to " << output.toStdString() << std::endl;
+    } else {
+        std::cerr << "Error: failed to write image to " << output.toStdString() << std::endl;
     }
     a.exit();
 }

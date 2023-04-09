@@ -21,6 +21,7 @@ class CS123XmlSceneParser : public CS123ISceneParser {
 
 public:
     // Create a parser, passing it the scene file.
+    CS123XmlSceneParser(const std::string& filename);
     CS123XmlSceneParser(const std::string& filename, int _cnt);
 
     // Clean up all data for the scene
@@ -58,7 +59,7 @@ private:
     CS123SceneGlobalData m_globalData;
     std::vector<CS123SceneNode*> m_nodes;
 
-    int cnt;
+    int cnt = -1;
 };
 
 #endif
