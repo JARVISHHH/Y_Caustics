@@ -32,7 +32,7 @@ int main(int argc, char *argv[])
     QString output = args[1];
 
     bool usePhotonMapping = true;
-    int samplePerPixel = 10;
+    int samplePerPixel = 100;
     bool defocusBlurOn = false;
     bool useOrenNayerBRDF = false;
     bool importanceSampling = false;
@@ -45,7 +45,6 @@ int main(int argc, char *argv[])
         a.exit(1);
         return 1;
     }
-
 
     PathTracer tracer(IMAGE_WIDTH, IMAGE_HEIGHT, usePhotonMapping, samplePerPixel, defocusBlurOn, useOrenNayerBRDF, importanceSampling);
 

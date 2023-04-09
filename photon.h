@@ -55,6 +55,8 @@ public:
 
     PhotonMap(int _maxPhotonNum = 50000);
 
+    void insert(PhotonMap photonMap);
+
     void store(Photon p);
     float get_photon_origin_axis(int index, int axis);
     void split(std::vector<Photon>& photons_temp, int start, int end, int mid, int axis);

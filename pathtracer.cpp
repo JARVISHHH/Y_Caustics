@@ -22,12 +22,15 @@ PathTracer::PathTracer(int width, int height, bool usePhotonMapping, int sampleP
 
 void PathTracer::traceScene(QRgb *imageData, const Scene& scene)
 {
+    // First pass of photon mapping
     if (m_usePhotonMapping) generatePhotons(scene);
     std::vector<Vector3f> intensityValues(m_width * m_height);
     Matrix4f invViewMat = (scene.getCamera().getScaleMatrix() * scene.getCamera().getViewMatrix()).inverse();
+    std::cout << "start trace" << std::endl;
+    #pragma omp parallel for
     for(int y = 0; y < m_height; ++y) {
-        std::cerr << "\rScanlines remaining: " << m_height - y << ' ' << std::flush;
-//        #pragma omp parallel for
+//        std::cerr << "\rScanlines remaining: " << m_height - y << ' ' << std::flush;
+        #pragma omp parallel for
         for(int x = 0; x < m_width; ++x) {
             int offset = x + (y * m_width);
             intensityValues[offset] = tracePixel(x, y, scene, invViewMat);

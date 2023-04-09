@@ -30,6 +30,15 @@ PhotonMap::PhotonMap(int _maxPhotonNum) : maxPhotonNum(_maxPhotonNum)
 {
     box_min = Eigen::Vector3f(1000000.0, 1000000.0, 1000000.0);
     box_max = Eigen::Vector3f(-1000000.0, -1000000.0, -1000000.0);
+
+    photons.reserve(maxPhotonNum);
+}
+
+void PhotonMap::insert(PhotonMap photonMap) {
+    photons.insert(photons.end(), photonMap.photons.begin(), photonMap.photons.end());
+
+    box_min = Eigen::Vector3f(min(box_min.x(), photonMap.box_min.x()), min(box_min.y(), photonMap.box_min.y()), min(box_min.z(), photonMap.box_min.z()));
+    box_max = Eigen::Vector3f(max(box_max.x(), photonMap.box_max.x()), max(box_max.y(), photonMap.box_max.y()), max(box_max.z(), photonMap.box_max.z()));
 }
 
 void PhotonMap::store(Photon p) {

@@ -51,7 +51,6 @@ bool Scene::load(QString filename, Scene **scenePointer)
     CS123SceneGlobalData globalData;
     parser.getGlobalData(globalData);
 
-
     scene->setGlobalData(globalData);
 
     CS123SceneLightData lightData;
@@ -140,11 +139,8 @@ bool Scene::parseTree(CS123SceneNode *root, Scene *scene, const std::string &bas
     BVH *bvh = new BVH(objects);
 
     scene->_objects = objects;
-
-    for (int i = 0; i < objects->size(); ++i) {
-        std::cout<<((Triangle *)(objects->at(i)))->getIndex()<<std::endl;
-    }
     scene->setBVH(*bvh);
+
     return true;
 }
 
