@@ -2,71 +2,61 @@
 #include "util/coordinatesystem.h"
 #include "util/random.h"
 
-//void PhotonMapping::generatePhotonMap(PhotonMap &pmap, const Scene &scene, bool isCaustic) {
-//    for (auto light: scene.getEmissives()) {
-//        size_t pmapSize = pmap.photons.size();
-//        while ((pmap.photons.size() - pmapSize) < (float)pmap.maxPhotonNum * 0.5) {
-//            //std::cerr << pmap.photons.size() << std::flush;
-//            Vector3<Vector3f> vertices = light->getVertices();
-//            Vector3f lightPos = UniformSampleTriangle(vertices[0], vertices[1], vertices[2]);
-//            Vector3f n = light->getNormal(lightPos);
-//            Vector3f d = UniformSampleOnHemisphere();
-//            CoordinateSystem onb(n);
-//            d = onb.from(d).normalized();
-//            Vector3f color = Vector3f(light->getMaterial().emission[0], light->getMaterial().emission[1], light->getMaterial().emission[2]) / light->getMaterial().emission[0];
-//            double lightPdf = 1.0f / (light->getAera() * d.dot(n));
-//            Ray scatteredLight = Ray(lightPos + 0.01 * d, d);
-//            if (!isCaustic) tracePhoton(pmap, scatteredLight, scene, color / lightPdf, 0);
-//            else tracePhotonCaustic(pmap, scatteredLight, scene, color / lightPdf, 0, false);
-//        }
-//    }
-//}
-
 void PhotonMapping::generatePhotonMap(PhotonMap &pmap, const Scene &scene, bool isCaustic) {
-    int lightNum = scene.getEmissives().size();
-    std::vector<PhotonMap> photonMaps(lightNum, PhotonMap(pmap.maxPhotonNum / lightNum + 1));
-//    #pragma omp parallel for
-    for(int i = 0; i < lightNum; i++) {
-        auto light = scene.getEmissives()[i];
-        Vector3<Vector3f> vertices = light->getVertices();
-        Vector3f color = Vector3f(light->getMaterial().emission[0], light->getMaterial().emission[1], light->getMaterial().emission[2]) / light->getMaterial().emission[0];
-        while((pmap.maxPhotonNum / lightNum - photonMaps[i].photons.size()) / 5 > 5) {
-            int tempSize = (pmap.maxPhotonNum / lightNum - photonMaps[i].photons.size()) / 5;
-            std::vector<PhotonMap> tempMaps(tempSize, PhotonMap(5));
-            #pragma omp parallel for
-            for(int j = 0; j < tempSize; j++) {
-                Vector3f lightPos = UniformSampleTriangle(vertices[0], vertices[1], vertices[2]);
-                Vector3f n = light->getNormal(lightPos);
-                Vector3f d = UniformSampleOnHemisphere();
-                CoordinateSystem onb(n);
-                d = onb.from(d).normalized();
-                double lightPdf = 1.0f / (light->getAera() * d.dot(n));
-                Ray scatteredLight = Ray(lightPos + 0.01 * d, d);
-                if (!isCaustic) tracePhoton(tempMaps[j], scatteredLight, scene, color / lightPdf, 0);
-                else tracePhotonCaustic(tempMaps[j], scatteredLight, scene, color / lightPdf, 0, false);
-            }
-            for(int j = 0; j < tempSize; j++) photonMaps[i].insert(tempMaps[j]);
-        }
-        while (photonMaps[i].photons.size() < pmap.maxPhotonNum / lightNum) {
+    for (auto light: scene.getEmissives()) {
+        size_t pmapSize = pmap.photons.size();
+        while ((pmap.photons.size() - pmapSize) < (float)pmap.maxPhotonNum * 0.5) {
+            //std::cerr << pmap.photons.size() << std::flush;
+            Vector3<Vector3f> vertices = light->getVertices();
             Vector3f lightPos = UniformSampleTriangle(vertices[0], vertices[1], vertices[2]);
             Vector3f n = light->getNormal(lightPos);
             Vector3f d = UniformSampleOnHemisphere();
             CoordinateSystem onb(n);
             d = onb.from(d).normalized();
+            Vector3f color = Vector3f(light->getMaterial().emission[0], light->getMaterial().emission[1], light->getMaterial().emission[2]) / light->getMaterial().emission[0];
             double lightPdf = 1.0f / (light->getAera() * d.dot(n));
             Ray scatteredLight = Ray(lightPos + 0.01 * d, d);
-            if (!isCaustic) tracePhoton(photonMaps[i], scatteredLight, scene, color / lightPdf, 0);
-            else tracePhotonCaustic(photonMaps[i], scatteredLight, scene, color / lightPdf, 0, false);
+            if (!isCaustic) tracePhoton(pmap, scatteredLight, scene, color / lightPdf, 0);
+            else tracePhotonCaustic(pmap, scatteredLight, scene, color / lightPdf, 0, false);
         }
     }
-    for(int i = 0; i < lightNum; i++) pmap.insert(photonMaps[i]);
 }
+
+//void PhotonMapping::generatePhotonMap(PhotonMap &pmap, const Scene &scene, bool isCaustic) {
+//    int lightNum = scene.getEmissives().size();
+//    std::vector<PhotonMap> photonMaps(lightNum, PhotonMap(pmap.maxPhotonNum / lightNum + 1));
+////    #pragma omp parallel for
+//    for(int i = 0; i < lightNum; i++) {
+//        auto light = scene.getEmissives()[i];
+//        Vector3<Vector3f> vertices = light->getVertices();
+//        Vector3f color = Vector3f(light->getMaterial().emission[0], light->getMaterial().emission[1], light->getMaterial().emission[2]) / light->getMaterial().emission[0];
+//        while(photonMaps[i].photons.size() < pmap.maxPhotonNum / lightNum) {
+//            int tempSize = pmap.maxPhotonNum / lightNum - photonMaps[i].photons.size();
+//            std::vector<PhotonMap> tempMaps(tempSize, PhotonMap(1));
+//            #pragma omp parallel for
+//            for(int j = 0; j < tempSize; j++) {
+//                Vector3f lightPos = UniformSampleTriangle(vertices[0], vertices[1], vertices[2]);
+//                Vector3f n = light->getNormal(lightPos);
+//                Vector3f d = UniformSampleOnHemisphere();
+//                CoordinateSystem onb(n);
+//                d = onb.from(d).normalized();
+//                double lightPdf = 1.0f / (light->getAera() * d.dot(n));
+//                Ray scatteredLight = Ray(lightPos + 0.01 * d, d);
+//                if (!isCaustic) tracePhoton(tempMaps[j], scatteredLight, scene, color / lightPdf, 0);
+//                else tracePhotonCaustic(tempMaps[j], scatteredLight, scene, color / lightPdf, 0, false);
+//            }
+//            for(int j = 0; j < tempSize; j++) photonMaps[i].insert(tempMaps[j]);
+//        }
+//    }
+//    for(int i = 0; i < lightNum; i++) pmap.insert(photonMaps[i]);
+//}
 
 void PhotonMapping::selectMaterial(const tinyobj::material_t& mat, std::shared_ptr<Material> &obj) {
     if (mat.specular[0] > 0.25 && mat.shininess > 20.0 && mat.shininess < 150.0) {
         obj = std::make_shared<GlossySpecular>(mat);
     } else if (mat.specular[0] > 0.25 && mat.ior > 1.2) {
         obj = std::make_shared<Dielectric>(mat);
+//        std::cout << "whoohoo" << std::endl;
     } else if (mat.specular[0] > 0.25 && mat.shininess > 180.0) {
         obj = std::make_shared<Mirror>(mat);
     } else {
@@ -147,9 +137,10 @@ void PhotonMapping::tracePhotonCaustic(PhotonMap &pmap, const Ray &r, const Scen
             }
         }
 
+
         Ray nextRay(ray);
         obj->getScatteredRay(ray, i, nextRay);
-        tracePhotonCaustic(pmap, nextRay, scene, piecewiseMul(factor, lightColor) * (1.0f / maxRefl), depth + 1, true);
+        tracePhotonCaustic(pmap, nextRay, scene, piecewiseMul(factor, lightColor) * (1.0f / maxRefl), depth + 1, obj->getType() == MAT_TYPE_DIELECTRIC);
     }
 
 }

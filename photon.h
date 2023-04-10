@@ -53,7 +53,7 @@ public:
     int maxPhotonNum;
     std::vector<Photon> photons;
 
-    PhotonMap(int _maxPhotonNum = 50000);
+    PhotonMap(int _maxPhotonNum = 5000);
 
     void insert(PhotonMap photonMap);
 

@@ -41,7 +41,9 @@ void PathTracer::traceScene(QRgb *imageData, const Scene& scene)
 }
 
 void PathTracer::generatePhotons(const Scene& scene) {
+    std::cout << "start generate" << std::endl;
     photonmapper.generatePhotonMap(pmap_r, scene);
+    std::cout << "finish first generate" << std::endl;
     pmap_r.balance();
     std::cout<<"finish generating photon map, size: "<<pmap_r.photons.size()<<std::endl;
 //    pmap_caustic.maxPhotonNum = 20000;
@@ -226,11 +228,11 @@ void PathTracer::toneMap(QRgb *imageData, std::vector<Vector3f> &intensityValues
     for(int y = 0; y < m_height; ++y) {
         for(int x = 0; x < m_width; ++x) {
             int offset = x + (y * m_width);
-            maxColor[0] = std::max(maxColor[0], intensityValues[offset][0]);
-            maxColor[1] = std::max(maxColor[1], intensityValues[offset][1]);
-            maxColor[2] = std::max(maxColor[2], intensityValues[offset][2]);
+//            maxColor[0] = std::max(maxColor[0], intensityValues[offset][0]);
+//            maxColor[1] = std::max(maxColor[1], intensityValues[offset][1]);
+//            maxColor[2] = std::max(maxColor[2], intensityValues[offset][2]);
             imageData[offset] = qRgb(255 * intensityValues[offset][0], 255 * intensityValues[offset][1], 255 * intensityValues[offset][2]);
         }
     }
-    std::cout<<maxColor[0]<<" "<<maxColor[1]<<" "<<maxColor[2]<<std::endl;
+//    std::cout<<maxColor[0]<<" "<<maxColor[1]<<" "<<maxColor[2]<<std::endl;
 }
