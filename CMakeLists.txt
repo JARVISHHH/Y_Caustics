@@ -77,6 +77,8 @@ add_executable(${PROJECT_NAME}
     scene/randomgenerator.h
     photon.h
     photonmapping.h
+
+    projection/plane.h projection/plane.cpp
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
