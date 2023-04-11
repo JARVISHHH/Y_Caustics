@@ -5,6 +5,8 @@
 #include "material/mirror.h"
 #include "material/orennayer.h"
 #include "scene/sampler.h"
+#include "stylized/projection/plane.h"
+#include "stylized/stylizedcaustics.h"
 
 #include <iostream>
 
@@ -15,6 +17,8 @@
 
 using namespace Eigen;
 
+bool doStylizedCaustics = true;
+
 const double albedo = 0.75;
 PathTracer::PathTracer(int width, int height, bool usePhotonMapping, int samplePerPixel, bool defocusBlurOn, bool useOrenNayerBRDF, bool importanceSampling)
     : m_width(width), m_height(height), m_usePhotonMapping(usePhotonMapping), m_defocusBlurOn(defocusBlurOn), m_useOrenNayerBRDF(useOrenNayerBRDF), m_importanceSampling(importanceSampling), rng(samplePerPixel, time(NULL))
@@ -23,7 +27,43 @@ PathTracer::PathTracer(int width, int height, bool usePhotonMapping, int sampleP
 void PathTracer::traceScene(QRgb *imageData, const Scene& scene)
 {
     // First pass of photon mapping
-    if (m_usePhotonMapping) generatePhotons(scene);
+    if (m_usePhotonMapping) {
+        generatePhotons(scene);
+        if(doStylizedCaustics) {
+            // TODO: move points
+            StylizedCaustics stylizedCaustics(2, 1);
+            auto imageSamples = stylizedCaustics.sample(531, 171, "./example-scenes/images/CS2240.png");
+            std::cout << "samples: " << imageSamples.size() << std::endl;
+            // Set plane
+            Plane plane(0, Eigen::Vector3f(0, 0, 3), Eigen::Vector3f(0, 1, 0));
+            // Projection
+            auto& photons = pmap_caustic.photons;
+            std::cout << "photons number: " << photons.size() << std::endl;
+            std::vector<Eigen::Vector2f> caustics(photons.size());
+            // (1) calculate average origin
+            Eigen::Vector3f averageOrigin = {0, 0, 0};
+            for(const auto& photon: photons) averageOrigin += photon.origin;
+            averageOrigin /= photons.size();
+            std::cout << averageOrigin[0] << " " << averageOrigin[1] << " " << averageOrigin[2] << std::endl;
+            // (2) calculate 2d coordinates
+            for(int i = 0; i < photons.size(); i++) {
+                caustics[i] = plane.projectDirection(averageOrigin, photons[i].dir);
+            }
+            std::cout << "Finish project" << std::endl;
+            // Assign (Greedy algorithm)
+            stylizedCaustics.assign(caustics, imageSamples);
+            std::cout << "Finish assign" << std::endl;
+            stylizedCaustics.move(caustics);
+            std::cout << "Finish move" << std::endl;
+            // Back projection
+            for(int i = 0; i < photons.size(); i++) {
+                auto& photon = photons[i];
+                auto hitPoint = plane.backProjectPoint(scene, averageOrigin, caustics[i]);
+                photon.dir = (hitPoint - photon.origin).normalized();
+            }
+            std::cout << "Finish stylized caustics" << std::endl;
+        }
+    }
     std::vector<Vector3f> intensityValues(m_width * m_height);
     Matrix4f invViewMat = (scene.getCamera().getScaleMatrix() * scene.getCamera().getViewMatrix()).inverse();
     std::cout << "start trace" << std::endl;

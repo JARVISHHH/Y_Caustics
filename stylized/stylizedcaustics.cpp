@@ -1,40 +1,55 @@
 #include "stylizedcaustics.h"
 #include "imagesampler.h"
+#include <iostream>
 
-StylizedCaustics::StylizedCaustics()
+StylizedCaustics::StylizedCaustics(float width, float height)
+    : width(width), height(height)
 {
 
 }
 
-std::vector<Eigen::Vector2f> StylizedCaustics::sample(int width, int height, std::string path) {
-    ImageSampler imageSampler;
-    return imageSampler.sample(width, height, path);
+std::vector<Eigen::Vector2f> StylizedCaustics::sample(int imageWidth, int imageHeight, std::string path) {
+    ImageSampler imageSampler(width, height);
+    return imageSampler.sample(imageWidth, imageHeight, path);
 }
 
 void StylizedCaustics::assign(std::vector<Eigen::Vector2f>& caustics, std::vector<Eigen::Vector2f>& images) {
     m = caustics.size();
     n = m;  // TODO: user-define n
 
+    std::cout << "m: " << m << " n: " << n << std::endl;
+    std::cout << "image size: " << images.size() << std::endl;
+
     // Sample sources and targets
     sources = caustics;
+    targets.resize(0);
     targets.reserve(m);
     int restTargets = m;
     while(images.size() < restTargets) {
         targets.insert(targets.end(), images.begin(), images.end());
-        restTargets -= m;
+        restTargets -= images.size();
     }
     std::random_shuffle(images.begin(), images.end());
     targets.insert(targets.end(), images.begin(), images.begin() + restTargets);
+    std::cout << "targets size: " << targets.size() << std::endl;
 
     // Initialize assignment map
     assignmentMap.resize(m);
     for(int i = 0; i < m; i++)
         assignmentMap[i] = i;
 
-    // Initialize distance matrices
-    initializeMatrices();
-    // Greedy assign
-    greedy();
+//    // Initialize distance matrices
+//    initializeMatrices();
+//    // Greedy assign
+//    greedy();
+}
+
+void StylizedCaustics::move(std::vector<Eigen::Vector2f>& caustics) {
+    assert(caustics.size() == sources.size());
+    for(int i = 0; i < caustics.size(); i++) {
+//        caustics[i] = targets[assignmentMap[i]];
+        caustics[i] = targets[i];
+    }
 }
 
 float StylizedCaustics::energy(float a, float b) {
