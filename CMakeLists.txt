@@ -80,6 +80,7 @@ add_executable(${PROJECT_NAME}
 
     stylized/projection/plane.h stylized/projection/plane.cpp
     stylized/stylizedcaustics.h stylized/stylizedcaustics.cpp
+    stylized/imagesampler.h stylized/imagesampler.cpp
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE

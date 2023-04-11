@@ -1,11 +1,14 @@
 #include "stylizedcaustics.h"
+#include "imagesampler.h"
 
-StylizedCaustics::StylizedCaustics(int m, int n)
-    : m(m), n(n)
+StylizedCaustics::StylizedCaustics()
 {
-    assignmentMap.resize(m);
-    for(int i = 0; i < m; i++)
-        assignmentMap[i] = i;
+
+}
+
+std::vector<Eigen::Vector2f> StylizedCaustics::sample(int width, int height, std::string path) {
+    ImageSampler imageSampler;
+    return imageSampler.sample(width, height, path);
 }
 
 void StylizedCaustics::assign(std::vector<Eigen::Vector2f>& caustics, std::vector<Eigen::Vector2f>& images) {

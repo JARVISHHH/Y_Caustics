@@ -8,6 +8,7 @@
 
 #include <QImage>
 
+#include "stylized/stylizedcaustics.h"
 #include "util/CS123Common.h"
 
 #include "stylized/projection/plane.h"
@@ -40,6 +41,7 @@ int main(int argc, char *argv[])
     bool importanceSampling = false;
 
     QImage image(IMAGE_WIDTH, IMAGE_HEIGHT, QImage::Format_RGB32);
+//    QImage image(531, 171, QImage::Format_RGB32);
 
     Scene *scene;
     if(!Scene::load(scenefile, &scene)) {
@@ -54,6 +56,21 @@ int main(int argc, char *argv[])
 //    std::cout << projectedPoint[0] << " " << projectedPoint[1] << std::endl;
 //    auto backProjectedPoint = plane.backProject(*scene, Eigen::Vector3f(0, 6, 0), projectedPoint);
 //    std::cout << backProjectedPoint[0] << " " << backProjectedPoint[1] << " " << backProjectedPoint[2] << std::endl;
+
+    // Image sampler test
+//    StylizedCaustics StylizedCaustics;
+//    auto samples = StylizedCaustics.sample(531, 171, "./example-scenes/images/CS2240.png");
+//    std::cout << "number of samples: " << samples.size() << std::endl;
+
+//    QRgb *data = reinterpret_cast<QRgb *>(image.bits());
+//    for(int x = 0; x < 531; x++)
+//        for(int y = 0; y < 171; y++)
+//            data[x + y * 531] = qRgb(0, 0, 0);
+//    for(auto& samplePoint: samples) {
+//        int x = std::max(0, int(samplePoint[0] + 531 / 2.0f));
+//        int y = std::max(0, int(samplePoint[1] + 171 / 2.0f));
+//        data[x + y * 531] = qRgb(255, 255, 255);
+//    }
 
     PathTracer tracer(IMAGE_WIDTH, IMAGE_HEIGHT, usePhotonMapping, samplePerPixel, defocusBlurOn, useOrenNayerBRDF, importanceSampling);
 

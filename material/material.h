@@ -36,7 +36,7 @@ public:
         return Eigen::Vector3f(0, 0, 0);
     }
 
-    virtual void getScatteredRay(const Ray &ray, const IntersectionInfo &i, Ray &scattered);
+    virtual void getScatteredRay(const Ray &ray, const IntersectionInfo &i, Ray &scattered) = 0;
 
     virtual Eigen::Vector3f getColor() const {
         return m_diffuseColor;
@@ -54,13 +54,13 @@ public:
         return m_emissiveColor;
     }
 
-    virtual double samplePDF() const;
+    virtual double samplePDF() const = 0;
 
     virtual double sampleBRDF(Vector3f in = Vector3f(0, 0, 0), Vector3f n = Vector3f(0, 0, 0), Vector3f out = Vector3f(0, 0, 0)) const {
         return 0.0;
     }
 
-    virtual mat_type_t getType() const;
+    virtual mat_type_t getType() const = 0;
 
 };
 

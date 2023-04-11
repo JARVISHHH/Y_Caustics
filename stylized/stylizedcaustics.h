@@ -7,8 +7,9 @@
 class StylizedCaustics
 {
 public:
-    StylizedCaustics(int m, int n);
+    StylizedCaustics();
 
+    std::vector<Eigen::Vector2f> sample(int width, int height, std::string path);
     void assign(std::vector<Eigen::Vector2f>& caustics, std::vector<Eigen::Vector2f>& images);
 
 private:

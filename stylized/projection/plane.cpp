@@ -21,7 +21,7 @@ Eigen::Vector2f Plane::project(const Eigen::Vector3f& pointOrigin, const Eigen::
 
     // Get the intersection with the plane in 3D space
     auto d = point3D - pointOrigin;
-    assert(d.dot(normal) != 0);
+    assert(d.dot(normal3D) != 0);
     auto t = (center3D - pointOrigin).dot(normal3D) / d.dot(normal3D);
     assert(t >= 0);
 
