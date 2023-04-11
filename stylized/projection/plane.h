@@ -9,6 +9,8 @@ class Plane
 public:
     Plane(float rotateAngle, Eigen::Vector3f center3D, Eigen::Vector3f normal3D);
 
+
+
     Eigen::Vector2f projectPoint(const Eigen::Vector3f& pointOrigin, const Eigen::Vector3f& point3D);
     Eigen::Vector2f projectDirection(const Eigen::Vector3f& pointOrigin, const Eigen::Vector3f& pointDirection);
     Eigen::Vector3f backProjectPoint(const Scene& scene, const Eigen::Vector3f& pointOrigin, const Eigen::Vector2f& point2D);

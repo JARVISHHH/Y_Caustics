@@ -31,18 +31,18 @@ void PathTracer::traceScene(QRgb *imageData, const Scene& scene)
         generatePhotons(scene);
         if(doStylizedCaustics) {
             // TODO: move points
-            StylizedCaustics stylizedCaustics(2, 1);
+            StylizedCaustics stylizedCaustics(3, 1.5);
             auto imageSamples = stylizedCaustics.sample(531, 171, "./example-scenes/images/CS2240.png");
             std::cout << "samples: " << imageSamples.size() << std::endl;
             // Set plane
-            Plane plane(0, Eigen::Vector3f(0, 0, 3), Eigen::Vector3f(0, 1, 0));
+            Plane plane(0, Eigen::Vector3f(0, 0, 2), Eigen::Vector3f(0, 1, 0));
             // Projection
             auto& photons = pmap_caustic.photons;
             std::cout << "photons number: " << photons.size() << std::endl;
             std::vector<Eigen::Vector2f> caustics(photons.size());
             // (1) calculate average origin
             Eigen::Vector3f averageOrigin = {0, 0, 0};
-            for(const auto& photon: photons) averageOrigin += photon.origin;
+            for(const auto& photon: photons) averageOrigin += photon.lastHit;
             averageOrigin /= photons.size();
             std::cout << averageOrigin[0] << " " << averageOrigin[1] << " " << averageOrigin[2] << std::endl;
             // (2) calculate 2d coordinates
@@ -56,11 +56,21 @@ void PathTracer::traceScene(QRgb *imageData, const Scene& scene)
             stylizedCaustics.move(caustics);
             std::cout << "Finish move" << std::endl;
             // Back projection
+            pmap_caustic.box_max = Eigen::Vector3f(-1000000.0, -1000000.0, -1000000.0);
+            pmap_caustic.box_min = Eigen::Vector3f(1000000.0, 1000000.0, 1000000.0);;
             for(int i = 0; i < photons.size(); i++) {
                 auto& photon = photons[i];
+                std::cout << "Photon position: " << photon.origin[0] << " " << photon.origin[1] << " " << photon.origin[2] << std::endl;
                 auto hitPoint = plane.backProjectPoint(scene, averageOrigin, caustics[i]);
-                photon.dir = (hitPoint - photon.origin).normalized();
+                std::cout << "Hit point: " << hitPoint[0] << " " << hitPoint[1] << " " << hitPoint[2] << std::endl;
+//                hitPoint[1] = 0;
+                photon.origin = hitPoint;
+//                photon.origin = photon.origin;
+                photon.dir = (hitPoint - photon.lastHit).normalized();
+                pmap_caustic.box_min = Eigen::Vector3f(min(pmap_caustic.box_min.x(), photon.origin.x()), min(pmap_caustic.box_min.y(), photon.origin.y()), min(pmap_caustic.box_min.z(), photon.origin.z()));
+                pmap_caustic.box_max = Eigen::Vector3f(max(pmap_caustic.box_max.x(), photon.origin.x()), max(pmap_caustic.box_max.y(), photon.origin.y()), max(pmap_caustic.box_max.z(), photon.origin.z()));
             }
+            pmap_caustic.balance();
             std::cout << "Finish stylized caustics" << std::endl;
         }
     }

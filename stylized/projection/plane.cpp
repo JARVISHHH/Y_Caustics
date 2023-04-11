@@ -1,4 +1,8 @@
 #include "plane.h"
+#include "material/dielectric.h"
+#include "material/glossyspecular.h"
+#include "material/lambertian.h"
+#include "material/mirror.h"
 
 Plane::Plane(float rotateAngle, Eigen::Vector3f center3D, Eigen::Vector3f normal3D)
     : rotateAngle(rotateAngle), center3D(center3D), normal3D(normal3D.normalized())
@@ -60,7 +64,26 @@ Eigen::Vector2f Plane::projectDirection(const Eigen::Vector3f& pointOrigin, cons
 
     assert(std::abs(p[1]) < 0.00005);
 
+//    Eigen::Vector4f testPoint(0, 0, 3, 1);
+//    testPoint = matrix22D * testPoint;
+//    std::cout << "Test point to 2D: " << testPoint[0] << " " << testPoint[1] << " " << testPoint[2] << std::endl;
+
     return {p[0], p[2]};
+}
+
+void selectMaterial(const tinyobj::material_t& mat, std::shared_ptr<Material> &obj) {
+    if (mat.specular[0] > 0.25 && mat.shininess > 20.0 && mat.shininess < 150.0) {
+        obj = std::make_shared<GlossySpecular>(mat);
+    } else if (mat.specular[0] > 0.25 && mat.ior > 1.2) {
+        obj = std::make_shared<Dielectric>(mat);
+//        std::cout << "whoohoo" << std::endl;
+    } else if (mat.specular[0] > 0.25 && mat.shininess > 180.0) {
+        obj = std::make_shared<Mirror>(mat);
+    } else {
+        obj = std::make_shared<Lambertian>(mat);
+//        obj = std::make_shared<OrenNayer>(mat);
+    }
+
 }
 
 Eigen::Vector3f Plane::backProjectPoint(const Scene& scene, const Eigen::Vector3f& pointOrigin, const Eigen::Vector2f& point2D) {
@@ -78,8 +101,25 @@ Eigen::Vector3f Plane::backProjectPoint(const Scene& scene, const Eigen::Vector3
     Ray ray(pointOrigin, (point3D - pointOrigin).normalized());
     // Find the new intersection
     bool intersect = scene.getIntersection(ray, &i);
-    assert(intersect);
-    return i.hit;
+    const Triangle *t = static_cast<const Triangle *>(i.data);//Get the triangle in the mesh that was intersected
+    const tinyobj::material_t& mat = t->getMaterial();//Get the material of the triangle from the mesh
+    std::shared_ptr<Material> obj = std::make_shared<Lambertian>(mat);
+
+    selectMaterial(mat, obj);
+
+    while(intersect && obj->getType() != MAT_TYPE_LAMBERTIAN) {
+        Ray nextRay(i.hit + ray.d * 0.0001, ray.d);
+        intersect = scene.getIntersection(nextRay, &i);
+
+        const Triangle *t = static_cast<const Triangle *>(i.data);//Get the triangle in the mesh that was intersected
+        const tinyobj::material_t& mat = t->getMaterial();//Get the material of the triangle from the mesh
+        obj = std::make_shared<Lambertian>(mat);
+
+        selectMaterial(mat, obj);
+    }
+
+    if(!intersect) return {0, 0, 2};
+    else return i.hit;
 }
 
 Eigen::Vector3f Plane::backProjectDirection(const Scene& scene, const Eigen::Vector3f& pointOrigin, const Eigen::Vector2f& point2D) {

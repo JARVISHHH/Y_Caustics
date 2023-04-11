@@ -87,6 +87,7 @@ void PhotonMapping::tracePhoton(PhotonMap &pmap, const Ray &r, const Scene &scen
         if (obj->getType() == MAT_TYPE_LAMBERTIAN) {
             if (random_double() > maxRefl) { // absorb the photon
                 Photon p;
+                p.lastHit = ray.o;
                 p.power = Vector3f(factor[0] * lightColor[0] * (1.0f / (1 - maxRefl)),
                                    factor[1] * lightColor[1] * (1.0f / (1 - maxRefl)),
                                    factor[2] * lightColor[2] * (1.0f / (1 - maxRefl)));
@@ -127,6 +128,7 @@ void PhotonMapping::tracePhotonCaustic(PhotonMap &pmap, const Ray &r, const Scen
         if (obj->getType() == MAT_TYPE_LAMBERTIAN) {
             if (random_double() > maxRefl) { // absorb the photon
                 Photon p;
+                p.lastHit = ray.o;
                 p.power = Vector3f(factor[0] * lightColor[0] * (1.0f / (1 - maxRefl)),
                                    factor[1] * lightColor[1] * (1.0f / (1 - maxRefl)),
                                    factor[2] * lightColor[2] * (1.0f / (1 - maxRefl)));

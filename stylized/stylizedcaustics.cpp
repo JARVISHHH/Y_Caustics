@@ -20,9 +20,18 @@ void StylizedCaustics::assign(std::vector<Eigen::Vector2f>& caustics, std::vecto
     std::cout << "m: " << m << " n: " << n << std::endl;
     std::cout << "image size: " << images.size() << std::endl;
 
+    Eigen::Vector2f maxPoint(-100, -100), minPoint(100, 100);
+    for(auto& point: images) {
+        for(int i = 0; i < 2; i++) {
+            maxPoint[i] = std::max(maxPoint[i], point[i]);
+            minPoint[i] = std::min(minPoint[i], point[i]);
+        }
+    }
+    std::cout << "max point: " << maxPoint[0] << " " << maxPoint[1] << std::endl;
+    std::cout << "min point: " << minPoint[0] << " " << minPoint[1] << std::endl;
+
     // Sample sources and targets
     sources = caustics;
-    targets.resize(0);
     targets.reserve(m);
     int restTargets = m;
     while(images.size() < restTargets) {
@@ -45,10 +54,11 @@ void StylizedCaustics::assign(std::vector<Eigen::Vector2f>& caustics, std::vecto
 }
 
 void StylizedCaustics::move(std::vector<Eigen::Vector2f>& caustics) {
-    assert(caustics.size() == sources.size());
+//    assert(caustics.size() == sources.size());
     for(int i = 0; i < caustics.size(); i++) {
 //        caustics[i] = targets[assignmentMap[i]];
         caustics[i] = targets[i];
+//        caustics[i] = {0, 0};
     }
 }
 
