@@ -78,7 +78,8 @@ add_executable(${PROJECT_NAME}
     photon.h
     photonmapping.h
 
-    projection/plane.h projection/plane.cpp
+    stylized/projection/plane.h stylized/projection/plane.cpp
+    stylized/stylizedcaustics.h stylized/stylizedcaustics.cpp
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
