@@ -50,9 +50,9 @@ int main(int argc, char *argv[])
 
     // projection test
 //    Plane plane(Eigen::Vector3f(0, 1, 0), Eigen::Vector3f(0, 1, 0));
-//    auto projectedPoint = plane.project(Eigen::Vector3f(0, 2, 0), Eigen::Vector3f(0, -1, 0));
+//    auto projectedPoint = plane.project(Eigen::Vector3f(0, 6, 0), Eigen::Vector3f(0, -1, 0));
 //    std::cout << projectedPoint[0] << " " << projectedPoint[1] << std::endl;
-//    auto backProjectedPoint = plane.backProject(*scene, Eigen::Vector3f(0, 2, 0), projectedPoint);
+//    auto backProjectedPoint = plane.backProject(*scene, Eigen::Vector3f(0, 6, 0), projectedPoint);
 //    std::cout << backProjectedPoint[0] << " " << backProjectedPoint[1] << " " << backProjectedPoint[2] << std::endl;
 
     PathTracer tracer(IMAGE_WIDTH, IMAGE_HEIGHT, usePhotonMapping, samplePerPixel, defocusBlurOn, useOrenNayerBRDF, importanceSampling);
