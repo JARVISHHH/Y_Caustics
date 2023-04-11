@@ -18,6 +18,7 @@
 using namespace Eigen;
 
 bool doStylizedCaustics = true;
+bool useGreedyMethod = false;
 
 const double albedo = 0.75;
 PathTracer::PathTracer(int width, int height, bool usePhotonMapping, int samplePerPixel, bool defocusBlurOn, bool useOrenNayerBRDF, bool importanceSampling)
@@ -33,18 +34,18 @@ void PathTracer::traceScene(QRgb *imageData, const Scene& scene)
             // TODO: move points
             StylizedCaustics stylizedCaustics(3, 1.5);
             auto imageSamples = stylizedCaustics.sample(531, 171, "./example-scenes/images/CS2240.png");
-            std::cout << "samples: " << imageSamples.size() << std::endl;
+//            std::cout << "samples: " << imageSamples.size() << std::endl;
             // Set plane
             Plane plane(0, Eigen::Vector3f(0, 0, 2), Eigen::Vector3f(0, 1, 0));
             // Projection
             auto& photons = pmap_caustic.photons;
-            std::cout << "photons number: " << photons.size() << std::endl;
+//            std::cout << "photons number: " << photons.size() << std::endl;
             std::vector<Eigen::Vector2f> caustics(photons.size());
             // (1) calculate average origin
             Eigen::Vector3f averageOrigin = {0, 0, 0};
             for(const auto& photon: photons) averageOrigin += photon.lastHit;
             averageOrigin /= photons.size();
-            std::cout << averageOrigin[0] << " " << averageOrigin[1] << " " << averageOrigin[2] << std::endl;
+//            std::cout << averageOrigin[0] << " " << averageOrigin[1] << " " << averageOrigin[2] << std::endl;
             // (2) calculate 2d coordinates
             for(int i = 0; i < photons.size(); i++) {
                 caustics[i] = plane.projectDirection(averageOrigin, photons[i].dir);
@@ -60,9 +61,9 @@ void PathTracer::traceScene(QRgb *imageData, const Scene& scene)
             pmap_caustic.box_min = Eigen::Vector3f(1000000.0, 1000000.0, 1000000.0);;
             for(int i = 0; i < photons.size(); i++) {
                 auto& photon = photons[i];
-                std::cout << "Photon position: " << photon.origin[0] << " " << photon.origin[1] << " " << photon.origin[2] << std::endl;
+//                std::cout << "Photon position: " << photon.origin[0] << " " << photon.origin[1] << " " << photon.origin[2] << std::endl;
                 auto hitPoint = plane.backProjectPoint(scene, averageOrigin, caustics[i]);
-                std::cout << "Hit point: " << hitPoint[0] << " " << hitPoint[1] << " " << hitPoint[2] << std::endl;
+//                std::cout << "Hit point: " << hitPoint[0] << " " << hitPoint[1] << " " << hitPoint[2] << std::endl;
 //                hitPoint[1] = 0;
                 photon.origin = hitPoint;
 //                photon.origin = photon.origin;

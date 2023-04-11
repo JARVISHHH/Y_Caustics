@@ -2,6 +2,8 @@
 #include "imagesampler.h"
 #include <iostream>
 
+extern bool useGreedyMethod;
+
 StylizedCaustics::StylizedCaustics(float width, float height)
     : width(width), height(height)
 {
@@ -18,7 +20,7 @@ void StylizedCaustics::assign(std::vector<Eigen::Vector2f>& caustics, std::vecto
     n = m;  // TODO: user-define n
 
     std::cout << "m: " << m << " n: " << n << std::endl;
-    std::cout << "image size: " << images.size() << std::endl;
+//    std::cout << "image size: " << images.size() << std::endl;
 
     Eigen::Vector2f maxPoint(-100, -100), minPoint(100, 100);
     for(auto& point: images) {
@@ -27,8 +29,8 @@ void StylizedCaustics::assign(std::vector<Eigen::Vector2f>& caustics, std::vecto
             minPoint[i] = std::min(minPoint[i], point[i]);
         }
     }
-    std::cout << "max point: " << maxPoint[0] << " " << maxPoint[1] << std::endl;
-    std::cout << "min point: " << minPoint[0] << " " << minPoint[1] << std::endl;
+//    std::cout << "max point: " << maxPoint[0] << " " << maxPoint[1] << std::endl;
+//    std::cout << "min point: " << minPoint[0] << " " << minPoint[1] << std::endl;
 
     // Sample sources and targets
     sources = caustics;
@@ -40,24 +42,26 @@ void StylizedCaustics::assign(std::vector<Eigen::Vector2f>& caustics, std::vecto
     }
     std::random_shuffle(images.begin(), images.end());
     targets.insert(targets.end(), images.begin(), images.begin() + restTargets);
-    std::cout << "targets size: " << targets.size() << std::endl;
+//    std::cout << "targets size: " << targets.size() << std::endl;
 
     // Initialize assignment map
     assignmentMap.resize(m);
     for(int i = 0; i < m; i++)
         assignmentMap[i] = i;
 
-//    // Initialize distance matrices
-//    initializeMatrices();
-//    // Greedy assign
-//    greedy();
+    if(useGreedyMethod) {
+        // Initialize distance matrices
+        initializeMatrices();
+        // Greedy assign
+        greedy();
+    }
 }
 
 void StylizedCaustics::move(std::vector<Eigen::Vector2f>& caustics) {
-//    assert(caustics.size() == sources.size());
+    assert(caustics.size() == sources.size());
     for(int i = 0; i < caustics.size(); i++) {
-//        caustics[i] = targets[assignmentMap[i]];
-        caustics[i] = targets[i];
+        caustics[i] = targets[assignmentMap[i]];
+//        caustics[i] = targets[i];
 //        caustics[i] = {0, 0};
     }
 }
@@ -80,8 +84,10 @@ void StylizedCaustics::initializeMatrices() {
 void StylizedCaustics::greedy() {
     float firstTerm = (DA - DB).norm(), secondTerm = DAB.trace();
     float oldEnergy = energy(firstTerm, secondTerm), newEnergy;
+    std::cout << "Original energy: " << oldEnergy << std::endl;
     bool swapAccepted = false;
     do {
+        swapAccepted = false;
         for(int j = 0; j < n; j++) {
             for(int k = 0; k < n; k++) {
                 int x = assignmentMap[j], y = assignmentMap[k];
@@ -127,4 +133,5 @@ void StylizedCaustics::greedy() {
             }
         }
     } while(swapAccepted);
+    std::cout << "Final energy: " << oldEnergy << std::endl;
 }

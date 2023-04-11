@@ -20,9 +20,9 @@ Plane::Plane(float rotateAngle, Eigen::Vector3f center3D, Eigen::Vector3f normal
 
     matrix22D = matrix23D.inverse();
 
-    Eigen::Vector4f testPoint(1, 0, 1, 1);
-    testPoint = matrix23D * testPoint;
-    std::cout << "Test point: " << testPoint[0] << " " << testPoint[1] << " " << testPoint[2] << std::endl;
+//    Eigen::Vector4f testPoint(1, 0, 1, 1);
+//    testPoint = matrix23D * testPoint;
+//    std::cout << "Test point: " << testPoint[0] << " " << testPoint[1] << " " << testPoint[2] << std::endl;
 }
 
 Eigen::Vector2f Plane::projectPoint(const Eigen::Vector3f& pointOrigin, const Eigen::Vector3f& point3D) {
