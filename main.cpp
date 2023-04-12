@@ -89,9 +89,9 @@ int main(int argc, char *argv[])
                     success = image.save(output, "PNG");
                 }
                 if(success) {
-                    std::cout << "Wrote rendered image to " << output.toStdString() << std::endl;
+                    std::cout << "Wrote rendered image to " << path << std::endl;
                 } else {
-                    std::cerr << "Error: failed to write image to " << output.toStdString() << std::endl;
+                    std::cerr << "Error: failed to write image to " << path << std::endl;
                 }
             }
             float currentTime = timeStep;
@@ -109,9 +109,9 @@ int main(int argc, char *argv[])
                     success = image.save(output, "PNG");
                 }
                 if(success) {
-                    std::cout << "Wrote rendered image to " << output.toStdString() << std::endl;
+                    std::cout << "Wrote rendered image to " << path << std::endl;
                 } else {
-                    std::cerr << "Error: failed to write image to " << output.toStdString() << std::endl;
+                    std::cerr << "Error: failed to write image to " << path << std::endl;
                 }
 
                 currentTime += timeStep;

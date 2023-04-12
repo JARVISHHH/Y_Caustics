@@ -114,7 +114,7 @@ Eigen::Vector3f Plane::backProjectPoint(const Scene& scene, const Eigen::Vector3
     selectMaterial(mat, obj);
 
     while(intersect && obj->getType() != MAT_TYPE_LAMBERTIAN) {
-        Ray nextRay(i.hit + ray.d * 0.0001, ray.d);
+        Ray nextRay(i.hit + ray.d * 0.000001, ray.d);
         intersect = scene.getIntersection(nextRay, &i);
 
         const Triangle *t = static_cast<const Triangle *>(i.data);//Get the triangle in the mesh that was intersected

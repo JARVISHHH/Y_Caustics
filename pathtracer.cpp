@@ -17,7 +17,7 @@
 using namespace Eigen;
 
 bool doStylizedCaustics = true;
-bool useGreedyMethod = false;
+bool useGreedyMethod = true;
 
 const double albedo = 0.75;
 PathTracer::PathTracer(Scene *scene, int width, int height, bool usePhotonMapping, int samplePerPixel, bool defocusBlurOn, bool useOrenNayerBRDF, bool importanceSampling)
