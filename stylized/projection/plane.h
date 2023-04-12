@@ -7,6 +7,7 @@
 class Plane
 {
 public:
+    Plane();
     Plane(float rotateAngle, Eigen::Vector3f center3D, Eigen::Vector3f normal3D);
 
     Eigen::Vector2f projectPoint(const Eigen::Vector3f& pointOrigin, const Eigen::Vector3f& point3D);
