@@ -1,17 +1,25 @@
 #ifndef STYLIZEDCAUSTICS_H
 #define STYLIZEDCAUSTICS_H
 
+#include "photon.h"
+#include "stylized/projection/plane.h"
 #include <Eigen/Dense>
 #include <vector>
 
 class StylizedCaustics
 {
 public:
+    StylizedCaustics();
     StylizedCaustics(float width, float height);
 
     std::vector<Eigen::Vector2f> sample(int width, int height, std::string path);
-    void assign(std::vector<Eigen::Vector2f>& caustics, std::vector<Eigen::Vector2f>& images);
-    void move(std::vector<Eigen::Vector2f>& caustics);
+    void project(const Scene& scene, const std::vector<Photon> photons, Plane& plane);
+    void assign(std::vector<Eigen::Vector2f>& images);
+    std::vector<Eigen::Vector2f> move(float t = 0);
+    void backProject(const Scene& scene, PhotonMap& pmap_caustic, Plane& plane, std::vector<Eigen::Vector2f>& currentPos);
+
+    void calculateAverageOrigin(const std::vector<Photon>& photons);
+    Eigen::Vector3f getAverageOrigin() {return averageOrigin;}
 
 private:
     float energy(float a, float b);
@@ -25,9 +33,12 @@ private:
     std::vector<Eigen::Vector2f> sources;  // Points of source caustics A
     std::vector<Eigen::Vector2f> targets;  // Points of target image B
     std::vector<int> assignmentMap;  // ith point in A should map to assignmentMap[i]th point in B
+    Eigen::Vector3f averageOrigin;
 
     Eigen::MatrixXf DA, DB, DAB;
     float beta = 0.5;
+
+    std::vector<int> photonsMap;
 };
 
 #endif // STYLIZEDCAUSTICS_H

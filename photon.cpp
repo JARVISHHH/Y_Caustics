@@ -79,6 +79,16 @@ void PhotonMap::split(vector<Photon>& photons_temp, int start, int end, int mid,
     }
 }
 
+void PhotonMap::update() {
+    box_min = Eigen::Vector3f(1000000.0, 1000000.0, 1000000.0);
+    box_max = Eigen::Vector3f(-1000000.0, -1000000.0, -1000000.0);
+    for(const auto& p: photons) {
+        box_min = Eigen::Vector3f(min(box_min.x(), p.origin.x()), min(box_min.y(), p.origin.y()), min(box_min.z(), p.origin.z()));
+        box_max = Eigen::Vector3f(max(box_max.x(), p.origin.x()), max(box_max.y(), p.origin.y()), max(box_max.z(), p.origin.z()));
+    }
+    balance();
+}
+
 void PhotonMap::balance()
 {
     vector<Photon> phptons_temp = photons;

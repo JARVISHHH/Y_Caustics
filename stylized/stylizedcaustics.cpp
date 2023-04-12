@@ -4,6 +4,10 @@
 
 extern bool useGreedyMethod;
 
+StylizedCaustics::StylizedCaustics() {
+
+}
+
 StylizedCaustics::StylizedCaustics(float width, float height)
     : width(width), height(height)
 {
@@ -15,12 +19,25 @@ std::vector<Eigen::Vector2f> StylizedCaustics::sample(int imageWidth, int imageH
     return imageSampler.sample(imageWidth, imageHeight, path);
 }
 
-void StylizedCaustics::assign(std::vector<Eigen::Vector2f>& caustics, std::vector<Eigen::Vector2f>& images) {
-    m = caustics.size();
+void StylizedCaustics::project(const Scene& scene, const std::vector<Photon> photons, Plane& plane) {
+    sources.clear();
+    for(int i = 0; i < photons.size(); i++) {
+        auto caustics2D = plane.projectPoint(averageOrigin, photons[i].origin);
+        if(caustics2D.norm() > 100) continue;
+        sources.push_back(caustics2D);
+        photonsMap.push_back(i);
+//        auto backPro = plane.backProjectPoint(scene, averageOrigin, caustics2D);
+//        if(backPro.norm() > 100) backPro = photons[i].origin;
+//        std::cout << "Original pos: " << photons[i].origin[0] << " " << photons[i].origin[1] << " " << photons[i].origin[2] << std::endl;
+//        std::cout << "Back pos: " << backPro[0] << " " << backPro[1] << " " << backPro[2] << std::endl;
+    }
+}
+
+void StylizedCaustics::assign(std::vector<Eigen::Vector2f>& images) {
+    m = sources.size();
     n = m;  // TODO: user-define n
 
     std::cout << "m: " << m << " n: " << n << std::endl;
-//    std::cout << "image size: " << images.size() << std::endl;
 
     Eigen::Vector2f maxPoint(-100, -100), minPoint(100, 100);
     for(auto& point: images) {
@@ -29,11 +46,8 @@ void StylizedCaustics::assign(std::vector<Eigen::Vector2f>& caustics, std::vecto
             minPoint[i] = std::min(minPoint[i], point[i]);
         }
     }
-//    std::cout << "max point: " << maxPoint[0] << " " << maxPoint[1] << std::endl;
-//    std::cout << "min point: " << minPoint[0] << " " << minPoint[1] << std::endl;
 
     // Sample sources and targets
-    sources = caustics;
     targets.reserve(m);
     int restTargets = m;
     while(images.size() < restTargets) {
@@ -57,13 +71,35 @@ void StylizedCaustics::assign(std::vector<Eigen::Vector2f>& caustics, std::vecto
     }
 }
 
-void StylizedCaustics::move(std::vector<Eigen::Vector2f>& caustics) {
-    assert(caustics.size() == sources.size());
-    for(int i = 0; i < caustics.size(); i++) {
-        caustics[i] = targets[assignmentMap[i]];
-//        caustics[i] = targets[i];
-//        caustics[i] = {0, 0};
+std::vector<Eigen::Vector2f> StylizedCaustics::move(float t) {
+    std::vector<Eigen::Vector2f> res(sources.size());
+    for(int i = 0; i < sources.size(); i++) {
+        res[i] = t * (targets[assignmentMap[i]] - sources[i]) + sources[i];
     }
+    return res;
+}
+
+void StylizedCaustics::backProject(const Scene& scene, PhotonMap& pmap_caustic, Plane& plane, std::vector<Eigen::Vector2f>& currentPos) {
+    pmap_caustic.box_max = Eigen::Vector3f(-1000000.0, -1000000.0, -1000000.0);
+    pmap_caustic.box_min = Eigen::Vector3f(1000000.0, 1000000.0, 1000000.0);
+    auto& photons = pmap_caustic.photons;
+    for(int i = 0; i < sources.size(); i++) {
+        auto& photon = photons[photonsMap[i]];
+//        std::cout << "Photon position: " << photon.origin[0] << " " << photon.origin[1] << " " << photon.origin[2] << std::endl;
+        auto hitPoint = plane.backProjectPoint(scene, averageOrigin, currentPos[i]);
+        if(hitPoint.norm() > 100) hitPoint = photon.origin;
+//        std::cout << "Hit point: " << hitPoint[0] << " " << hitPoint[1] << " " << hitPoint[2] << std::endl;
+        photon.origin = hitPoint;
+        photon.origin = photon.origin;
+        photon.dir = (hitPoint - photon.lastHit).normalized();
+    }
+    pmap_caustic.update();
+}
+
+void StylizedCaustics::calculateAverageOrigin(const std::vector<Photon>& photons) {
+    averageOrigin = {0, 0, 0};
+    for(const auto& photon: photons) averageOrigin += photon.lastHit;
+    averageOrigin /= photons.size();
 }
 
 float StylizedCaustics::energy(float a, float b) {

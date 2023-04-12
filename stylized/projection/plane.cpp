@@ -4,6 +4,10 @@
 #include "material/lambertian.h"
 #include "material/mirror.h"
 
+Plane::Plane() {
+
+}
+
 Plane::Plane(float rotateAngle, Eigen::Vector3f center3D, Eigen::Vector3f normal3D)
     : rotateAngle(rotateAngle), center3D(center3D), normal3D(normal3D.normalized())
 {
@@ -41,7 +45,7 @@ Eigen::Vector2f Plane::projectPoint(const Eigen::Vector3f& pointOrigin, const Ei
     Eigen::Vector4f p = {point[0], point[1], point[2], 1};
     p = matrix22D * p;
 
-    assert(std::abs(p[1]) < 0.00005);
+    assert(std::abs(p[1]) < 0.000005);
 
     return {p[0], p[2]};
 }
@@ -55,18 +59,20 @@ Eigen::Vector2f Plane::projectDirection(const Eigen::Vector3f& pointOrigin, cons
     auto d = pointDirection;
     assert(d.dot(normal3D) != 0);
     auto t = (center3D - pointOrigin).dot(normal3D) / d.dot(normal3D);
-//    assert(t >= 0);
+
+    if(t < 0) return {-100, -100};
 
     auto point = pointOrigin + t * d;
 //    std::cout << "point " << point[0] << " " << point[1] << " " << point[2] << std::endl;
     Eigen::Vector4f p = {point[0], point[1], point[2], 1};
     p = matrix22D * p;
 
-    assert(std::abs(p[1]) < 0.00005);
+//    auto temp = matrix23D * p;
+//    std::cout << "Original pos: " << point[0] << " " << point[1] << " " << point[2] << std::endl;
+//    std::cout << "2D pos: " << p[0] << " " << p[1] << " " << p[2] << std::endl;
+//    std::cout << "back pos: " << temp[0] << " " << temp[1] << " " << temp[2] << std::endl;
 
-//    Eigen::Vector4f testPoint(0, 0, 3, 1);
-//    testPoint = matrix22D * testPoint;
-//    std::cout << "Test point to 2D: " << testPoint[0] << " " << testPoint[1] << " " << testPoint[2] << std::endl;
+    assert(std::abs(p[1]) < 0.000005);
 
     return {p[0], p[2]};
 }
@@ -95,7 +101,7 @@ Eigen::Vector3f Plane::backProjectPoint(const Scene& scene, const Eigen::Vector3
     Eigen::Vector4f point = {point2D[0], 0, point2D[1], 1};
     point = matrix23D * point;
 //    std::cout << "point3D " << point[0] << " " << point[1] << " " << point[2] << std::endl;
-    assert(std::abs(point[1]) < 0.00005);
+    assert(std::abs(point[1]) < 0.000005);
     Eigen::Vector3f point3D = {point[0], point[1], point[2]};
     // Get the new ray
     Ray ray(pointOrigin, (point3D - pointOrigin).normalized());
@@ -118,7 +124,7 @@ Eigen::Vector3f Plane::backProjectPoint(const Scene& scene, const Eigen::Vector3
         selectMaterial(mat, obj);
     }
 
-    if(!intersect) return {0, 0, 2};
+    if(!intersect) return {-100, -100, -100};
     else return i.hit;
 }
 
