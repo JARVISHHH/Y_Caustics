@@ -8,9 +8,12 @@
 class ImageSampler
 {
 public:
-    ImageSampler();
+    ImageSampler(float width, float height);
 
-    std::vector<Eigen::Vector2f> sample(int width, int height, std::string path);
+    std::vector<Eigen::Vector2f> sample(int imageWidth, int imageHeight, std::string path);
+
+private:
+    float width, height;
 };
 
 #endif // IMAGESAMPLER_H

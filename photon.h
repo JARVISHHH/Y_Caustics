@@ -7,6 +7,7 @@
 using namespace std;
 
 typedef struct Photon {
+    Eigen::Vector3f lastHit;
     Eigen::Vector3f origin;        // photon position
     Eigen::Vector3f power;      // photon power (uncompressed)
     int divide_axis;        // splitting plane for kd-tree
@@ -53,7 +54,7 @@ public:
     int maxPhotonNum;
     std::vector<Photon> photons;
 
-    PhotonMap(int _maxPhotonNum = 5000);
+    PhotonMap(int _maxPhotonNum = 1000);
 
     void insert(PhotonMap photonMap);
 
