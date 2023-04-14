@@ -12,6 +12,7 @@ set(CMAKE_AUTORCC ON)
 # Sets C++ standard
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_OSX_ARCHITECTURES "x86_64")
 
 # Specifies required Qt components
 find_package(Qt6 REQUIRED COMPONENTS Core)
