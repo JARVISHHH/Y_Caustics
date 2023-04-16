@@ -41,8 +41,13 @@ inline const Eigen::Vector3f UniformSampleOnHemisphere() noexcept {
 inline Eigen::Vector3f UniformSampleTriangle(Eigen::Vector3f v1, Eigen::Vector3f v2, Eigen::Vector3f v3) {
     Eigen::Vector3f v12 = v2 - v1;
     Eigen::Vector3f v13 = v3 - v1;
-    double u1 = random_double();
-    return v1 + u1 * v12 + (1 - u1) * v13;
+//    double u1 = random_double();
+//    return v1 + u1 * v12 + (1 - u1) * v13;
+    double s = random_double();
+    double t = random_double();
+    bool inTriangle = s + t <= 1;
+    Eigen::Vector3f pos = inTriangle ? v1 + s * v12 + t * v13 : v1 + (1.0 - s) * v12 + (1.0 - t) * v13;
+    return pos;
 }
 
 

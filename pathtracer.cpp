@@ -73,15 +73,15 @@ void PathTracer::traceScene(QRgb *imageData, const Scene& scene, float t)
 }
 
 void PathTracer::generatePhotons(const Scene& scene) {
-    std::cout << "start generate" << std::endl;
-    photonmapper.generatePhotonMap(pmap_r, scene);
-    std::cout << "finish first generate" << std::endl;
-    pmap_r.balance();
+//    std::cout << "start generate" << std::endl;
+//    photonmapper.generatePhotonMap(pmap_r, scene);
+//    std::cout << "finish first generate" << std::endl;
+//    pmap_r.balance();
     std::cout<<"finish generating photon map, size: "<<pmap_r.photons.size()<<std::endl;
-//    pmap_caustic.maxPhotonNum = 20000;
-//    photonmapper.generatePhotonMap(pmap_caustic, scene, true);
-//    pmap_caustic.balance();
-//    std::cout<<"finish generating caustic photon map, size: "<<pmap_caustic.photons.size()<<std::endl;
+    pmap_caustic.maxPhotonNum = 200000;
+    photonmapper.generatePhotonMap(pmap_caustic, scene, true);
+    pmap_caustic.balance();
+    std::cout<<"finish generating caustic photon map, size: "<<pmap_caustic.photons.size()<<std::endl;
 
 }
 
@@ -91,7 +91,7 @@ Vector3f PathTracer::tracePixel(int x, int y, const Scene& scene, const Matrix4f
 
     std::vector<Vector2f> pixelSamples = rng.GenerateStratifiedSamples();
 
-    for (int s = 0; s < 1; ++s) {
+    for (int s = 0; s < pixelSamples.size(); ++s) {
         Vector3f p(0, 0, 0);
         Vector3f d((2.f * (double(x) + pixelSamples[s][0]) / m_width) - 1, 1 - (2.f * (double(y) + pixelSamples[s][1]) / m_height), -1);
         d.normalize();
@@ -111,7 +111,7 @@ Vector3f PathTracer::tracePixel(int x, int y, const Scene& scene, const Matrix4f
         }
 
         r = r.transform(invViewMatrix);
-        Vector3f color = debugPhotonMap(r, scene);// traceRayWithPhotonMapping(r, scene, 0, true) * 2.5 : traceRayWithPathTracing(r, scene, 0, true) * 2.5;
+        Vector3f color = debugPhotonMap(r, scene);//traceRayWithPhotonMapping(r, scene, 0, true);// * 2.5 : traceRayWithPathTracing(r, scene, 0, true) * 2.5;
 //        pixelColor += Vector3f(color[0] / (1 + color[0]), color[1] / (1 + color[1]), color[2] / (1 + color[2]));
         pixelColor = color;
     }
@@ -119,7 +119,7 @@ Vector3f PathTracer::tracePixel(int x, int y, const Scene& scene, const Matrix4f
                 pixelColor[0] / (1 + pixelColor[0]),
                 pixelColor[1] / (1 + pixelColor[1]),
                 pixelColor[2] / (1 + pixelColor[2]));
-    return pixelColor;// / (double)(rng.m_samplesPerPixel);
+    return pixelColor / (double)(rng.m_samplesPerPixel);
 }
 
 void PathTracer::selectMaterial(const tinyobj::material_t& mat, std::shared_ptr<Material> &obj) {
@@ -152,7 +152,7 @@ Vector3f PathTracer::debugPhotonMap(const Ray& r, const Scene& scene) {
         Vector3f n = i.object->getNormal(i);
         n = n.dot(ray.d) < 0 ? n : -n;
 
-        return pmap_r.getIrradiance(pos, n, 0.02, 20);
+        return pmap_caustic.getIrradiance(pos, n, 0.003, 30);
     }
     return Vector3f(0.0, 0.0, 0.0);
 }
@@ -182,12 +182,14 @@ Vector3f PathTracer::traceRayWithPhotonMapping(const Ray& r, const Scene& scene,
         for (auto light: scene.getEmissives()) {
             Vector3f lightColor = sampler.sampleDirect(ray, i, light, scene, scatteredLight);
             Vector3f objColor = obj->sampleBRDF(ray.d, n, scatteredLight.d) * obj->getDiffuseColor();
-            sampleColor += piecewiseMul(lightColor, objColor);
+            sampleColor += 3.0 * piecewiseMul(lightColor, objColor);
         }
         // Self-emitting radiance
         if (countEmitted) {
             sampleColor += obj->getEmissiveColor();
         }
+
+
 
         // russian roulette
         if (depth >= 10) {
@@ -208,9 +210,9 @@ Vector3f PathTracer::traceRayWithPhotonMapping(const Ray& r, const Scene& scene,
 
             int nsamps = 1;
             for (int ss = 0; ss < nsamps ; ss++) {
-                Ray nextRay(ray);
-                obj->getScatteredRay(ray, i, nextRay);
-                sampleColor += photonmapper.getIrradiance(pmap_r, nextRay, scene, 0) * (1.0f / 1.0f);
+//                Ray nextRay(ray);
+//                obj->getScatteredRay(ray, i, nextRay);
+                sampleColor += pmap_r.getIrradiance(pos, normal, 0.02, 20);//photonmapper.getIrradiance(pmap_r, nextRay, scene, 0) * (1.0f / 1.0f);
             }
         } else {
             Ray nextRay(ray);

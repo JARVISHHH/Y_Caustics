@@ -138,11 +138,11 @@ Eigen::Vector3f PhotonMap::getIrradiance(Eigen::Vector3f origin, Eigen::Vector3f
     Eigen::Vector3f res(0.0, 0.0, 0.0);
     nearest_photons_map local_map(origin, max_dist * max_dist, max_num);
     local_map.get_nearest_photons(photons, 0);
-    if (local_map.nearest_photons.size() <= 5)
+    if (local_map.nearest_photons.size() <= 10)
         return res;
 
 //    return Eigen::Vector3f(1.0, 1.0, 1.0);
-//    return local_map.nearest_photons.top().p.power * (1.0 / (M_PI * max_dist * max_dist)) * (1.0 / M_PI);
+    return local_map.nearest_photons.top().p.power * (1.0 / (M_PI * max_dist * max_dist)) * (1.0 / M_PI);
 
     double size = local_map.nearest_photons.size();
 
@@ -154,7 +154,7 @@ Eigen::Vector3f PhotonMap::getIrradiance(Eigen::Vector3f origin, Eigen::Vector3f
         local_map.nearest_photons.pop();
     }
 
-    res *= (1.0 / (M_PI * max_dist * max_dist)) * (1.0 / M_PI) / size / 50.0;
+    res *= (1.0 / (M_PI * max_dist * max_dist)) * (1.0 / M_PI) / size / 100.0;
 //    cerr << res << endl;
     return res;
 }
