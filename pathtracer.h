@@ -11,6 +11,7 @@
 #include "photonmapping.h"
 #include "stylized/projection/plane.h"
 #include "stylized/stylizedcaustics.h"
+#include "integrator.h"
 
 class PathTracer
 {
@@ -32,6 +33,7 @@ private:
     PhotonMapping photonmapper;
 
     RandomGenerator rng;
+    Integrator m_integrator;
 
     StylizedCaustics stylizedCaustics;
     Plane plane;
@@ -41,10 +43,6 @@ private:
     void toneMap(QRgb *imageData, std::vector<Eigen::Vector3f> &intensityValues);
 
     Eigen::Vector3f tracePixel(int x, int y, const Scene &scene, const Eigen::Matrix4f &invViewMatrix);
-    Eigen::Vector3f traceRayWithPhotonMapping(const Ray& r, const Scene &scene, int depth, bool countEmitted);
-    Vector3f traceRayWithPathTracing(const Ray& r, const Scene& scene, int depth, bool countEmitted);
-    void selectMaterial(const tinyobj::material_t& mat, std::shared_ptr<Material> &obj);
-    Vector3f debugPhotonMap(const Ray& r, const Scene& scene);
 };
 
 #endif // PATHTRACER_H

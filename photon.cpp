@@ -5,6 +5,10 @@
 #include <cmath>
 #include <iostream>
 
+static double gaussianFilter(double dist, double maxDist) {
+    return 0.918 * (1.0 - (1.0 - std::exp(-1.953 * dist * dist / (2 * maxDist * maxDist))) / ( 1.0 - std::exp(-1.953)));
+}
+
 void nearest_photons_map::get_nearest_photons(const vector<Photon>& photons, int index)
 {
     Photon cur_photon = photons[index];
@@ -133,16 +137,15 @@ void PhotonMap::balance(vector<Photon>& photons_temp, int index, int start, int 
     }
 }
 
-Eigen::Vector3f PhotonMap::getIrradiance(Eigen::Vector3f origin, Eigen::Vector3f normal, float max_dist, int max_num)
+Eigen::Vector3f PhotonMap::getFixedRadiusIrradiance(Eigen::Vector3f origin, Eigen::Vector3f normal, float max_dist, int max_num, int min_num)
 {
     Eigen::Vector3f res(0.0, 0.0, 0.0);
     nearest_photons_map local_map(origin, max_dist * max_dist, max_num);
     local_map.get_nearest_photons(photons, 0);
-    if (local_map.nearest_photons.size() <= 10)
+    if (local_map.nearest_photons.size() <= min_num)
         return res;
 
-//    return Eigen::Vector3f(1.0, 1.0, 1.0);
-    return local_map.nearest_photons.top().p.power * (1.0 / (M_PI * max_dist * max_dist)) * (1.0 / M_PI);
+//    return local_map.nearest_photons.top().p.power * (1.0 / (M_PI * max_dist * max_dist)) * (1.0 / M_PI);
 
     double size = local_map.nearest_photons.size();
 
@@ -155,7 +158,28 @@ Eigen::Vector3f PhotonMap::getIrradiance(Eigen::Vector3f origin, Eigen::Vector3f
     }
 
     res *= (1.0 / (M_PI * max_dist * max_dist)) * (1.0 / M_PI) / size / 100.0;
-//    cerr << res << endl;
+    return res;
+}
+
+Eigen::Vector3f PhotonMap::getGaussianIrradiance(Eigen::Vector3f origin, Eigen::Vector3f normal, float max_dist, int max_num, int min_num)
+{
+    Eigen::Vector3f res(0.0, 0.0, 0.0);
+    nearest_photons_map local_map(origin, max_dist * max_dist, max_num);
+    local_map.get_nearest_photons(photons, 0);
+    if (local_map.nearest_photons.size() <= min_num)
+        return res;
+
+    double size = local_map.nearest_photons.size();
+
+    while (!local_map.nearest_photons.empty())
+    {
+        Eigen::Vector3f dir = local_map.nearest_photons.top().p.dir;
+        if (normal.dot(dir) < 0)
+            res += local_map.nearest_photons.top().p.power * gaussianFilter(local_map.nearest_photons.top().dist_square, max_dist);
+        local_map.nearest_photons.pop();
+    }
+
+    res *= (1.0 / (M_PI * max_dist * max_dist)) * (1.0 / M_PI) / size / 100.0;
     return res;
 }
 
@@ -164,11 +188,8 @@ Eigen::Vector3f PhotonMap::visualizePhotonMap(Eigen::Vector3f origin, float max_
     local_map.get_nearest_photons(photons, 0);
     if (local_map.nearest_photons.size() <= 3)
         return Eigen::Vector3f(0.0, 0.0, 0.0);
-//    else
-//        return Eigen::Vector3f(1.0, 1.0, 1.0);
-    Eigen::Vector3f res = local_map.nearest_photons.top().p.power;
-    res *= (1.0 / (M_PI * max_dist * max_dist)) * (1.0 / M_PI);
-    return res;
+    else
+        return Eigen::Vector3f(1.0, 1.0, 1.0);
 }
 
 

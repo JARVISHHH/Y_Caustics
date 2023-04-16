@@ -43,6 +43,7 @@ add_executable(${PROJECT_NAME}
     scene/randomgenerator.cpp
     photon.cpp
     photonmapping.cpp
+    integrator.cpp
 
     pathtracer.h
     scene/scene.h
@@ -77,6 +78,7 @@ add_executable(${PROJECT_NAME}
     scene/randomgenerator.h
     photon.h
     photonmapping.h
+    integrator.h
 
     stylized/projection/plane.h stylized/projection/plane.cpp
     stylized/stylizedcaustics.h stylized/stylizedcaustics.cpp

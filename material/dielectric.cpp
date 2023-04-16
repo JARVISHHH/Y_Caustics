@@ -11,7 +11,7 @@ double Dielectric::reflectance(double cosine, double refIdx) {
 Vector3f Dielectric::scatter(const Ray &ray, const IntersectionInfo &i, Ray &scattered) {
     getScatteredRay(ray, i, scattered);
     double pdf = samplePDF();
-    return m_brdf * (1.0 / pdf);
+    return m_brdf / pdf;
 }
 
 void Dielectric::getScatteredRay(const Ray &ray, const IntersectionInfo &i, Ray &scattered) {

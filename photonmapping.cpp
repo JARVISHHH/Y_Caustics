@@ -61,7 +61,6 @@ void PhotonMapping::selectMaterial(const tinyobj::material_t& mat, std::shared_p
         obj = std::make_shared<Mirror>(mat);
     } else {
         obj = std::make_shared<Lambertian>(mat);
-//        obj = std::make_shared<OrenNayer>(mat);
     }
 
 }
@@ -170,7 +169,7 @@ Vector3f PhotonMapping::getIrradiance(PhotonMap &pmap, const Ray &r, const Scene
 
             Vector3f pos = {newOrigin[0], newOrigin[1], newOrigin[2]};
             Vector3f normal = {n[0], n[1], n[2]};
-            Vector3f col = pmap.getIrradiance(pos, normal, 0.1, 100);
+            Vector3f col = pmap.getFixedRadiusIrradiance(pos, normal, 0.1, 100, 5);
             return col;
         } else {
             Ray nextRay(ray);
