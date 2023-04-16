@@ -16,7 +16,7 @@
 
 using namespace Eigen;
 
-bool doStylizedCaustics = true;
+bool doStylizedCaustics = false;
 bool useGreedyMethod = true;
 
 const double albedo = 0.75;
@@ -79,9 +79,9 @@ void PathTracer::generatePhotons(const Scene& scene) {
     pmap_r.balance();
     std::cout<<"finish generating photon map, size: "<<pmap_r.photons.size()<<std::endl;
 //    pmap_caustic.maxPhotonNum = 20000;
-    photonmapper.generatePhotonMap(pmap_caustic, scene, true);
-    pmap_caustic.balance();
-    std::cout<<"finish generating caustic photon map, size: "<<pmap_caustic.photons.size()<<std::endl;
+//    photonmapper.generatePhotonMap(pmap_caustic, scene, true);
+//    pmap_caustic.balance();
+//    std::cout<<"finish generating caustic photon map, size: "<<pmap_caustic.photons.size()<<std::endl;
 
 }
 
@@ -91,7 +91,7 @@ Vector3f PathTracer::tracePixel(int x, int y, const Scene& scene, const Matrix4f
 
     std::vector<Vector2f> pixelSamples = rng.GenerateStratifiedSamples();
 
-    for (int s = 0; s < rng.m_samplesPerPixel; ++s) {
+    for (int s = 0; s < 1; ++s) {
         Vector3f p(0, 0, 0);
         Vector3f d((2.f * (double(x) + pixelSamples[s][0]) / m_width) - 1, 1 - (2.f * (double(y) + pixelSamples[s][1]) / m_height), -1);
         d.normalize();
@@ -111,11 +111,15 @@ Vector3f PathTracer::tracePixel(int x, int y, const Scene& scene, const Matrix4f
         }
 
         r = r.transform(invViewMatrix);
-        Vector3f color = m_usePhotonMapping ? traceRayWithPhotonMapping(r, scene, 0, true) * 2.5 : traceRayWithPathTracing(r, scene, 0, true) * 2.5;
-        pixelColor += Vector3f(color[0] / (1 + color[0]), color[1] / (1 + color[1]), color[2] / (1 + color[2]));
+        Vector3f color = debugPhotonMap(r, scene);// traceRayWithPhotonMapping(r, scene, 0, true) * 2.5 : traceRayWithPathTracing(r, scene, 0, true) * 2.5;
+//        pixelColor += Vector3f(color[0] / (1 + color[0]), color[1] / (1 + color[1]), color[2] / (1 + color[2]));
+        pixelColor = color;
     }
-//    pixelColor = Vector3f(pixelColor[0] / (1 + pixelColor[0]), pixelColor[1] / (1 + pixelColor[1]), pixelColor[2] / (1 + pixelColor[2]));
-    return pixelColor / (double)(rng.m_samplesPerPixel);
+    pixelColor = Vector3f(
+                pixelColor[0] / (1 + pixelColor[0]),
+                pixelColor[1] / (1 + pixelColor[1]),
+                pixelColor[2] / (1 + pixelColor[2]));
+    return pixelColor;// / (double)(rng.m_samplesPerPixel);
 }
 
 void PathTracer::selectMaterial(const tinyobj::material_t& mat, std::shared_ptr<Material> &obj) {
@@ -132,6 +136,25 @@ void PathTracer::selectMaterial(const tinyobj::material_t& mat, std::shared_ptr<
         obj = std::make_shared<Lambertian>(mat, m_importanceSampling);
     }
 
+}
+
+Vector3f PathTracer::debugPhotonMap(const Ray& r, const Scene& scene) {
+    IntersectionInfo i;
+    Ray ray(r);
+    if(scene.getIntersection(ray, &i)) {
+        Vector3f pos = {i.hit[0], i.hit[1], i.hit[2]};
+        //pmap_r.visualizePhotonMap(pos, 0.008, 10);
+        const Triangle *t = static_cast<const Triangle *>(i.data);//Get the triangle in the mesh that was intersected
+        const tinyobj::material_t& mat = t->getMaterial();//Get the material of the triangle from the mesh
+        std::shared_ptr<Material> obj = std::make_shared<Lambertian>(mat);
+        selectMaterial(mat, obj);
+
+        Vector3f n = i.object->getNormal(i);
+        n = n.dot(ray.d) < 0 ? n : -n;
+
+        return pmap_r.getIrradiance(pos, n, 0.02, 20);
+    }
+    return Vector3f(0.0, 0.0, 0.0);
 }
 
 Vector3f PathTracer::traceRayWithPhotonMapping(const Ray& r, const Scene& scene, int depth, bool countEmitted) {

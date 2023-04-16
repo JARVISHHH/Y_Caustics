@@ -16,6 +16,7 @@ typedef enum {
 } mat_type_t;
 
 class Material {
+protected:
     Vector3f m_diffuseColor;
     Vector3f m_specularColor;
     Vector3f m_emissiveColor;

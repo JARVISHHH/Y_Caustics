@@ -44,6 +44,7 @@ private:
     Eigen::Vector3f traceRayWithPhotonMapping(const Ray& r, const Scene &scene, int depth, bool countEmitted);
     Vector3f traceRayWithPathTracing(const Ray& r, const Scene& scene, int depth, bool countEmitted);
     void selectMaterial(const tinyobj::material_t& mat, std::shared_ptr<Material> &obj);
+    Vector3f debugPhotonMap(const Ray& r, const Scene& scene);
 };
 
 #endif // PATHTRACER_H
