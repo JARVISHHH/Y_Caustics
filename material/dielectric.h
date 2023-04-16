@@ -13,7 +13,9 @@ public:
         m_isSpecular = true;
         m_maxRadiance = std::min((double)std::max(this->getSpecularColor()[0], std::max(this->getSpecularColor()[1], this->getSpecularColor()[2])), 0.9);
     };
-
+    Vector3f getColor() const {
+        return m_specularColor;
+    }
     Vector3f scatter(const Ray &ray, const IntersectionInfo &i, Ray &scattered);
     void getScatteredRay(const Ray &ray, const IntersectionInfo &i, Ray &scattered);
     double samplePDF() const;

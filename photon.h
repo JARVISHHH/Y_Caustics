@@ -54,7 +54,7 @@ public:
     int maxPhotonNum;
     std::vector<Photon> photons;
 
-    PhotonMap(int _maxPhotonNum = 2000);
+    PhotonMap(int _maxPhotonNum = 400000);
 
     void insert(PhotonMap photonMap);
 
@@ -64,7 +64,9 @@ public:
     void update();
     void balance();
     void balance(std::vector<Photon>& photons_temp, int index, int start, int end);
-    Eigen::Vector3f getIrradiance(Eigen::Vector3f origin, Eigen::Vector3f norm, float max_dist, int max_num);
+    Eigen::Vector3f getFixedRadiusIrradiance(Eigen::Vector3f origin, Eigen::Vector3f normal, float max_dist, int max_num, int min_num);
+    Eigen::Vector3f getGaussianIrradiance(Eigen::Vector3f origin, Eigen::Vector3f normal, float max_dist, int max_num, int min_num);
+    Eigen::Vector3f visualizePhotonMap(Eigen::Vector3f origin, float max_dist, int max_num);
 };
 
 

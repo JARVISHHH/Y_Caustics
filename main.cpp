@@ -38,7 +38,7 @@ int main(int argc, char *argv[])
     if(args.size() == 3) timeStepString = args[2];
 
     bool usePhotonMapping = true;
-    int samplePerPixel = 100;
+    int samplePerPixel = 1;
     bool defocusBlurOn = false;
     bool useOrenNayerBRDF = false;
     bool importanceSampling = false;
