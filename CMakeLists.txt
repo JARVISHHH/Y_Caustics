@@ -45,6 +45,7 @@ add_executable(${PROJECT_NAME}
     photon.cpp
     photonmapping.cpp
     integrator.cpp
+    tps.cpp
 
     pathtracer.h
     scene/scene.h
@@ -80,6 +81,7 @@ add_executable(${PROJECT_NAME}
     photon.h
     photonmapping.h
     integrator.h
+    tps.h
 
     stylized/projection/plane.h stylized/projection/plane.cpp
     stylized/stylizedcaustics.h stylized/stylizedcaustics.cpp
