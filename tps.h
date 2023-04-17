@@ -8,13 +8,14 @@ class tps
 {
 public:
 
-    void init(std::vector<Eigen::Vector2f> constraints);
+    void init(std::vector<Eigen::Vector2f> constraints, std::vector<Eigen::Vector2f> destinations);
 
     Eigen::Vector2f tps_solve(Eigen::Vector2f p);
 
 private:
 
     std::vector<Eigen::Vector2f> _constraints;
+    std::vector<Eigen::Vector2f> _destinations;
 
     Eigen::MatrixXf _mW;
 

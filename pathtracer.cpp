@@ -8,6 +8,7 @@
 #include <util/CS123Common.h>
 #include <util/random.h>
 
+#include "tps.h"
 using namespace Eigen;
 
 bool doStylizedCaustics = false;
@@ -50,6 +51,37 @@ PathTracer::PathTracer(Scene *scene,
             // Assign (Greedy algorithm)
             stylizedCaustics.assign(imageSamples);
             std::cout << "Finish assign" << std::endl;
+
+
+
+            //For Yingtong
+            //You have set A (n points), and you sample 300 points from A
+            //Let the positions of the 300 points be std::vector<Eigen::Vector2f> A_sample;
+
+            //You run the greedy algorithm and find the new 2D position of the 300 points,
+            //Let the new positions of the 300 points be std::vector<Eigen::Vector2f> B_sample;
+
+            //Do TPS here
+            //step 1: init tps
+//            tps tps_example;
+//            tps_example.init(A_sample, B_sample);
+
+            //step 2: use tps to find the position of rest n-300 points
+            //Let std::vector<Eigen::Vector2f> A_rest be the position of these n-300 points
+            //Let std::vector<Eigen::Vector2f> B_rest be the target position of these n-300 points we want to solve
+
+//            for(int i=0; i< A_rest.size(); i++){
+//                Eigen::Vector2f result = tps_example.solve(A_rest[i]);
+//                B_rest[i] = result;
+//            }
+
+
+            //For Yutang
+            //Now you have std::vector<Eigen::Vector2f> B_sample, containing 300 points
+            //and std::vector<Eigen::Vector2f> B_rest containing n-300 points
+            //Do refinement here
+
+
         }
     }
 }
