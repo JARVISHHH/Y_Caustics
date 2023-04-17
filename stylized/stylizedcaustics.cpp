@@ -54,7 +54,7 @@ void StylizedCaustics::assign(std::vector<Eigen::Vector2f>& images) {
         targets.insert(targets.end(), images.begin(), images.end());
         restTargets -= images.size();
     }
-    std::random_shuffle(images.begin(), images.end());
+//    std::random_shuffle(images.begin(), images.end());
     targets.insert(targets.end(), images.begin(), images.begin() + restTargets);
 //    std::cout << "targets size: " << targets.size() << std::endl;
 

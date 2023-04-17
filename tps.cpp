@@ -4,8 +4,14 @@
 
 #include <Eigen/QR>
 
-void tps::init(std::vector<Eigen::Vector2f> constraints){
+void tps::init(std::vector<Eigen::Vector2f> constraints, std::vector<Eigen::Vector2f> destinations){
     _constraints = constraints;
+    _destinations = destinations;
+
+    if(_constraints.size() != _destinations.size()){
+        std::cout <<"destinations must have the same size as constrains";
+        return;
+    }
     prepare_mW();
 }
 
@@ -74,13 +80,13 @@ Eigen::MatrixXf tps::build_L(){
 
 
 Eigen::MatrixXf tps::build_VO(){
-    int n = _constraints.size();
-    int rows = _constraints.size() + 3;
+    int n = _destinations.size();
+    int rows = _destinations.size() + 3;
     Eigen::MatrixXf VO = Eigen::MatrixXf::Zero(rows, 3);
 
     for(int i=0; i<n; i++){
-        VO(i,0) = _constraints[i][0];
-        VO(i,1) = _constraints[i][1];
+        VO(i,0) = _destinations[i][0];
+        VO(i,1) = _destinations[i][1];
     }
 
     return VO;
