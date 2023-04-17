@@ -36,6 +36,7 @@ PathTracer::PathTracer(Scene *scene,
         generatePhotons(*scene);
         if(doStylizedCaustics) {
             stylizedCaustics = StylizedCaustics(3, 1.5);
+            // Sample images
             auto imageSamples = stylizedCaustics.sample(531, 171, "./example-scenes/images/CS2240.png");
             // Set plane
             plane = Plane(0, Eigen::Vector3f(0, 0, 2), Eigen::Vector3f(0, 1, 0));
