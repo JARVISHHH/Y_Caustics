@@ -1,17 +1,21 @@
 #include "stylizedcaustics.h"
 #include "imagesampler.h"
+
 #include <iostream>
 
 extern bool useGreedyMethod;
 
-StylizedCaustics::StylizedCaustics() {
+std::random_device rd;
+std::mt19937 g;
 
+StylizedCaustics::StylizedCaustics() {
+    g = std::mt19937(rd());
 }
 
 StylizedCaustics::StylizedCaustics(float width, float height)
     : width(width), height(height)
 {
-
+    g = std::mt19937(rd());
 }
 
 std::vector<Eigen::Vector2f> StylizedCaustics::sample(int imageWidth, int imageHeight, std::string path) {
@@ -35,17 +39,24 @@ void StylizedCaustics::project(const Scene& scene, const std::vector<Photon> pho
 
 void StylizedCaustics::assign(std::vector<Eigen::Vector2f>& images) {
     m = sources.size();
-    n = m;  // TODO: user-define n
+    n = 300;  // TODO: user-define n
 
     std::cout << "m: " << m << " n: " << n << std::endl;
 
-    Eigen::Vector2f maxPoint(-100, -100), minPoint(100, 100);
-    for(auto& point: images) {
-        for(int i = 0; i < 2; i++) {
-            maxPoint[i] = std::max(maxPoint[i], point[i]);
-            minPoint[i] = std::min(minPoint[i], point[i]);
-        }
+    if(m < n) {
+        std::cerr << "Error: n bigger than n!" << std::endl;
+        return;
     }
+
+//    Eigen::Vector2f maxPoint(-100, -100), minPoint(100, 100);
+//    for(auto& point: images) {
+//        for(int i = 0; i < 2; i++) {
+//            maxPoint[i] = std::max(maxPoint[i], point[i]);
+//            minPoint[i] = std::min(minPoint[i], point[i]);
+//        }
+//    }
+
+    std::mt19937 rng(rd());    // Random-number engine used (Mersenne-Twister in this case)
 
     // Sample sources and targets
     targets.reserve(m);
@@ -55,13 +66,35 @@ void StylizedCaustics::assign(std::vector<Eigen::Vector2f>& images) {
         restTargets -= images.size();
     }
 //    std::random_shuffle(images.begin(), images.end());
+    std::shuffle(images.begin(), images.end(), g);
     targets.insert(targets.end(), images.begin(), images.begin() + restTargets);
 //    std::cout << "targets size: " << targets.size() << std::endl;
 
+    // Sample subsets
+    subsetSourcesIndex.clear(), subsetTargetsIndex.clear();
+    subsetSourcesIndex.reserve(n), subsetTargetsIndex.reserve(n);
+    std::vector<int> sampleIndex(m);
+    for(int i = 0; i < m; i++) sampleIndex[i] = i;
+    std::shuffle(sampleIndex.begin(), sampleIndex.end(), g);
+    for(int i = 0; i < n; i++) subsetSourcesIndex[i] = sampleIndex[i];
+    std::shuffle(sampleIndex.begin(), sampleIndex.end(), g);
+    for(int i = 0; i < n; i++) subsetTargetsIndex[i] = sampleIndex[i];
+
     // Initialize assignment map
     assignmentMap.resize(m);
-    for(int i = 0; i < m; i++)
+    std::unordered_map<int, int> target2source;
+    for(int i = 0; i < m; i++) {
         assignmentMap[i] = i;
+        target2source[i] = i;
+    }
+    for(int i = 0; i < n; i++) {
+        sourcesIndexInSubset[subsetSourcesIndex[i]] = i;
+        targetsIndexInSubset[subsetTargetsIndex[i]] = i;
+        int source1 = subsetSourcesIndex[i], source2 = target2source[subsetTargetsIndex[i]];
+        int target1 = subsetTargetsIndex[i], target2 = assignmentMap[subsetSourcesIndex[i]];
+        std::swap(assignmentMap[source1], assignmentMap[source2]);
+        std::swap(target2source[target1], target2source[target2]);
+    }
 
     if(useGreedyMethod) {
         // Initialize distance matrices
@@ -110,9 +143,9 @@ void StylizedCaustics::initializeMatrices() {
     DA = Eigen::MatrixXf(n, n), DB = Eigen::MatrixXf(n, n), DAB = Eigen::MatrixXf(n, n);
     for(int i = 0; i < n; i++) {
         for(int j = 0; j < n; j++) {
-            DA(i, j) = (sources[i] - sources[j]).norm();
-            DB(i, j) = (targets[i] - targets[j]).norm();
-            DAB(i, j) = (sources[i] - targets[j]).norm();
+            DA(i, j) = (sources[subsetSourcesIndex[i]] - sources[subsetSourcesIndex[j]]).norm();
+            DB(i, j) = (targets[subsetTargetsIndex[i]] - targets[subsetTargetsIndex[j]]).norm();
+            DAB(i, j) = (sources[subsetSourcesIndex[i]] - targets[subsetTargetsIndex[j]]).norm();
         }
     }
 }
@@ -127,8 +160,8 @@ void StylizedCaustics::greedy() {
         swapAccepted = false;
         for(int j = 0; j < n; j++) {
             for(int k = 0; k < n; k++) {
-                int x = assignmentMap[j], y = assignmentMap[k];
-                std::swap(assignmentMap[j], assignmentMap[k]);
+                int x = targetsIndexInSubset[assignmentMap[subsetSourcesIndex[j]]], y = targetsIndexInSubset[assignmentMap[subsetSourcesIndex[k]]];
+                std::swap(assignmentMap[subsetSourcesIndex[j]], assignmentMap[subsetSourcesIndex[k]]);
                 // calculate new energy
                 // Modify the first term
                 float originalFirstTerm = firstTerm, originalSecondTerm = secondTerm;
@@ -136,7 +169,7 @@ void StylizedCaustics::greedy() {
                 for(int i = 0; i < n; i++) {
                     if(i == j || i == k) continue;
 
-                    int z = assignmentMap[i];
+                    int z = targetsIndexInSubset[assignmentMap[subsetSourcesIndex[i]]];
 
                     firstTerm -= (DA(i, j) - DB(z, x)) * (DA(i, j) - DB(z, x));
                     firstTerm -= (DA(i, k) - DB(z, y)) * (DA(i, k) - DB(z, y));
@@ -164,7 +197,7 @@ void StylizedCaustics::greedy() {
                     swapAccepted = true;
                     break;
                 } else {
-                    std::swap(assignmentMap[j], assignmentMap[k]);
+                    std::swap(assignmentMap[subsetSourcesIndex[j]], assignmentMap[subsetSourcesIndex[k]]);
                     firstTerm = originalFirstTerm;
                     secondTerm = originalSecondTerm;
                 }

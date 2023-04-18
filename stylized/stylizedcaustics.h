@@ -5,6 +5,7 @@
 #include "stylized/projection/plane.h"
 #include <Eigen/Dense>
 #include <vector>
+#include <random>
 
 class StylizedCaustics
 {
@@ -32,6 +33,10 @@ private:
     int n;  // Number of points in subsets
     std::vector<Eigen::Vector2f> sources;  // Points of source caustics A
     std::vector<Eigen::Vector2f> targets;  // Points of target image B
+    std::vector<int> subsetSourcesIndex;
+    std::vector<int> subsetTargetsIndex;
+    std::unordered_map<int, int> sourcesIndexInSubset;
+    std::unordered_map<int, int> targetsIndexInSubset;
     std::vector<int> assignmentMap;  // ith point in A should map to assignmentMap[i]th point in B
     Eigen::Vector3f averageOrigin;
 

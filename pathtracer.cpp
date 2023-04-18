@@ -121,7 +121,7 @@ void PathTracer::generatePhotons(const Scene& scene) {
     std::cout << "finish first generate" << std::endl;
     pmap_r.balance();
     std::cout<<"finish generating photon map, size: "<<pmap_r.photons.size()<<std::endl;
-    pmap_caustic.maxPhotonNum = 300;
+    pmap_caustic.maxPhotonNum = 50000;
     photonmapper.generatePhotonMap(pmap_caustic, scene, true);
     pmap_caustic.balance();
     std::cout<<"finish generating caustic photon map, size: "<<pmap_caustic.photons.size()<<std::endl;
