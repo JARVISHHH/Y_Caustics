@@ -74,26 +74,26 @@ int main(int argc, char *argv[])
     }
     else if(args.size() == 3) {
         float timeStep = timeStepString.toFloat();
-        if(timeStep > 0 && timeStep < 1) {
-            for(int i = 0; i <= 1; i++) {
-                QImage image(IMAGE_WIDTH, IMAGE_HEIGHT, QImage::Format_RGB32);
+        for(int i = 0; i <= 1; i++) {
+            QImage image(IMAGE_WIDTH, IMAGE_HEIGHT, QImage::Format_RGB32);
 
-                QRgb *data = reinterpret_cast<QRgb *>(image.bits());
+            QRgb *data = reinterpret_cast<QRgb *>(image.bits());
 
-                tracer.traceScene(data, *scene, i);
+            tracer.traceScene(data, *scene, i);
 
-                std::string path = output.toStdString() + "-t" + std::to_string(i) + ".png";
+            std::string path = output.toStdString() + "-t" + std::to_string(i) + ".png";
 
-                bool success = image.save(QString::fromStdString(path));
-                if(!success) {
-                    success = image.save(output, "PNG");
-                }
-                if(success) {
-                    std::cout << "Wrote rendered image to " << path << std::endl;
-                } else {
-                    std::cerr << "Error: failed to write image to " << path << std::endl;
-                }
+            bool success = image.save(QString::fromStdString(path));
+            if(!success) {
+                success = image.save(output, "PNG");
             }
+            if(success) {
+                std::cout << "Wrote rendered image to " << path << std::endl;
+            } else {
+                std::cerr << "Error: failed to write image to " << path << std::endl;
+            }
+        }
+        if(timeStep > 0 && timeStep < 1) {
             float currentTime = timeStep;
             while(currentTime < 1) {
                 QImage image(IMAGE_WIDTH, IMAGE_HEIGHT, QImage::Format_RGB32);

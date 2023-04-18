@@ -9,9 +9,10 @@
 #include <util/random.h>
 
 #include "tps.h"
+
 using namespace Eigen;
 
-bool doStylizedCaustics = false;
+bool doStylizedCaustics = true;
 bool useGreedyMethod = true;
 
 const double albedo = 0.75;
@@ -95,6 +96,7 @@ void PathTracer::traceScene(QRgb *imageData, const Scene& scene, float t)
         // Back projection
         stylizedCaustics.backProject(scene, pmap_caustic, plane, currentPos);
         std::cout << "Finish stylized caustics" << std::endl;
+        setIntegrator();
     }
 
     std::vector<Vector3f> intensityValues(m_width * m_height);
@@ -119,10 +121,13 @@ void PathTracer::generatePhotons(const Scene& scene) {
     std::cout << "finish first generate" << std::endl;
     pmap_r.balance();
     std::cout<<"finish generating photon map, size: "<<pmap_r.photons.size()<<std::endl;
-    pmap_caustic.maxPhotonNum = 200000;
+    pmap_caustic.maxPhotonNum = 300;
     photonmapper.generatePhotonMap(pmap_caustic, scene, true);
     pmap_caustic.balance();
     std::cout<<"finish generating caustic photon map, size: "<<pmap_caustic.photons.size()<<std::endl;
+}
+
+void PathTracer::setIntegrator() {
     m_integrator.setPmap(pmap_r);
     m_integrator.setPmapCaustic(pmap_caustic);
 }

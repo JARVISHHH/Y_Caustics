@@ -122,6 +122,7 @@ void StylizedCaustics::greedy() {
     float oldEnergy = energy(firstTerm, secondTerm), newEnergy;
     std::cout << "Original energy: " << oldEnergy << std::endl;
     bool swapAccepted = false;
+    int sum = 0;
     do {
         swapAccepted = false;
         for(int j = 0; j < n; j++) {
@@ -161,13 +162,17 @@ void StylizedCaustics::greedy() {
                 if(newEnergy < oldEnergy) {
                     oldEnergy = newEnergy;
                     swapAccepted = true;
+                    break;
                 } else {
                     std::swap(assignmentMap[j], assignmentMap[k]);
                     firstTerm = originalFirstTerm;
                     secondTerm = originalSecondTerm;
                 }
             }
+            if(swapAccepted) break;
         }
+        sum++;
+//        if(sum % n == 0) std::cout << sum << std::endl;
     } while(swapAccepted);
     std::cout << "Final energy: " << oldEnergy << std::endl;
 }

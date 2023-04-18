@@ -56,7 +56,6 @@ void PhotonMapping::selectMaterial(const tinyobj::material_t& mat, std::shared_p
         obj = std::make_shared<GlossySpecular>(mat);
     } else if (mat.specular[0] > 0.25 && mat.ior > 1.2) {
         obj = std::make_shared<Dielectric>(mat);
-//        std::cout << "whoohoo" << std::endl;
     } else if (mat.specular[0] > 0.25 && mat.shininess > 180.0) {
         obj = std::make_shared<Mirror>(mat);
     } else {

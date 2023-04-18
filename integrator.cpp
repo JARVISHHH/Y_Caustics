@@ -89,8 +89,8 @@ Vector3f Integrator::traceRayWithPhotonMapping(const Ray& r, const Scene& scene,
         if (obj->getType() == MAT_TYPE_LAMBERTIAN) {
             Vector3f pos = {i.hit[0], i.hit[1], i.hit[2]};
             Vector3f normal = {n[0], n[1], n[2]};
-            sampleColor += pmap_caustic.getGaussianIrradiance(pos, normal, 0.003, 30, 10) / 10.0;
-            sampleColor += pmap.getGaussianIrradiance(pos, normal, 0.02, 20, 5);
+            sampleColor += pmap_caustic.getGaussianIrradiance(pos, normal, 0.01, 30, 10);
+//            sampleColor += pmap.getGaussianIrradiance(pos, normal, 0.02, 20, 5);
         } else {
             Ray nextRay(ray);
             obj->getScatteredRay(ray, i, nextRay);

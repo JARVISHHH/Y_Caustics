@@ -39,6 +39,7 @@ private:
     Plane plane;
 
     void generatePhotons(const Scene& scene);
+    void setIntegrator();
 
     void toneMap(QRgb *imageData, std::vector<Eigen::Vector3f> &intensityValues);
 
