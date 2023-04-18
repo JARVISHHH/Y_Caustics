@@ -13,7 +13,7 @@
 using namespace Eigen;
 
 bool doStylizedCaustics = true;
-bool useGreedyMethod = true;
+bool useGreedyMethod = false;
 
 const double albedo = 0.75;
 PathTracer::PathTracer(Scene *scene,
@@ -79,6 +79,7 @@ PathTracer::PathTracer(Scene *scene,
                 B[i] = result;
             }
             stylizedCaustics.setFinalResults(B);
+
             //For Yutang
             // Note from Yingtong: I didn't declare B_rest above, stylizedCaustics.finalResults contains all n points. I can modify the code if it's not convenient.
             //Now you have std::vector<Eigen::Vector2f> B_sample, containing 300 points
@@ -87,7 +88,7 @@ PathTracer::PathTracer(Scene *scene,
             // Note from Yingtong: Guess refinement is better to be a member function of class StylizedCaustics, since all data is stored in StylizedCaustics.
             // or make the stylizedCaustics a parameter of the function
 
-            // To show the final result, go to move() function in stylizedcaustics.cpp, uncomment the final results code
+            // To show the final result, go to move() function in stylizedcaustics.cpp, uncomment the final results code, and comment the results after tps
 
         }
     }
