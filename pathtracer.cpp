@@ -37,7 +37,7 @@ PathTracer::PathTracer(Scene *scene,
     if (m_usePhotonMapping) {
         generatePhotons(*scene);
         if(doStylizedCaustics) {
-            stylizedCaustics = StylizedCaustics(3, 1.5);
+            stylizedCaustics = StylizedCaustics(2, 1.5);
             // Sample images
             auto imageSamples = stylizedCaustics.sample(531, 171, "./example-scenes/images/CS2240.png");
             // Set plane
@@ -53,8 +53,6 @@ PathTracer::PathTracer(Scene *scene,
             stylizedCaustics.assign(imageSamples);
             std::cout << "Finish assign" << std::endl;
 
-
-
             //For Yingtong
             //You have set A (n points), and you sample 300 points from A
             //Let the positions of the 300 points be std::vector<Eigen::Vector2f> A_sample;
@@ -62,26 +60,34 @@ PathTracer::PathTracer(Scene *scene,
             //You run the greedy algorithm and find the new 2D position of the 300 points,
             //Let the new positions of the 300 points be std::vector<Eigen::Vector2f> B_sample;
 
+            std::vector<Eigen::Vector2f> A_sample = stylizedCaustics.getSubsetSourcesPos();
+            std::vector<Eigen::Vector2f> B_sample = stylizedCaustics.getSubsetTargetsPos();
+
             //Do TPS here
             //step 1: init tps
-//            tps tps_example;
-//            tps_example.init(A_sample, B_sample);
+            tps tpsSolver;
+            tpsSolver.init(A_sample, B_sample);
 
             //step 2: use tps to find the position of rest n-300 points
             //Let std::vector<Eigen::Vector2f> A_rest be the position of these n-300 points
             //Let std::vector<Eigen::Vector2f> B_rest be the target position of these n-300 points we want to solve
 
-//            for(int i=0; i< A_rest.size(); i++){
-//                Eigen::Vector2f result = tps_example.solve(A_rest[i]);
-//                B_rest[i] = result;
-//            }
-
-
+            std::vector<Eigen::Vector2f> A = stylizedCaustics.getSources();
+            std::vector<Eigen::Vector2f> B(A.size());
+            for(int i = 0; i< A.size(); i++){
+                Eigen::Vector2f result = tpsSolver.tps_solve(A[i]);
+                B[i] = result;
+            }
+            stylizedCaustics.setFinalResults(B);
             //For Yutang
+            // Note from Yingtong: I didn't declare B_rest above, stylizedCaustics.finalResults contains all n points. I can modify the code if it's not convenient.
             //Now you have std::vector<Eigen::Vector2f> B_sample, containing 300 points
             //and std::vector<Eigen::Vector2f> B_rest containing n-300 points
             //Do refinement here
+            // Note from Yingtong: Guess refinement is better to be a member function of class StylizedCaustics, since all data is stored in StylizedCaustics.
+            // or make the stylizedCaustics a parameter of the function
 
+            // To show the final result, go to move() function in stylizedcaustics.cpp, uncomment the final results code
 
         }
     }

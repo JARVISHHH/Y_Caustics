@@ -107,7 +107,10 @@ void StylizedCaustics::assign(std::vector<Eigen::Vector2f>& images) {
 std::vector<Eigen::Vector2f> StylizedCaustics::move(float t) {
     std::vector<Eigen::Vector2f> res(sources.size());
     for(int i = 0; i < sources.size(); i++) {
-        res[i] = t * (targets[assignmentMap[i]] - sources[i]) + sources[i];
+        // results after tps
+        res[i] = t * (finalResults[i] - sources[i]) + sources[i];
+        // final results
+//        res[i] = t * (targets[assignmentMap[i]] - sources[i]) + sources[i];
     }
     return res;
 }
@@ -133,6 +136,22 @@ void StylizedCaustics::calculateAverageOrigin(const std::vector<Photon>& photons
     averageOrigin = {0, 0, 0};
     for(const auto& photon: photons) averageOrigin += photon.lastHit;
     averageOrigin /= photons.size();
+}
+
+std::vector<Eigen::Vector2f> StylizedCaustics::getSubsetSourcesPos() {
+    std::vector<Eigen::Vector2f> res(n);
+    for(int i = 0; i < n; i++) {
+        res[i] = sources[subsetSourcesIndex[i]];
+    }
+    return res;
+}
+
+std::vector<Eigen::Vector2f> StylizedCaustics::getSubsetTargetsPos() {
+    std::vector<Eigen::Vector2f> res(n);
+    for(int i = 0; i < n; i++) {
+        res[i] = targets[assignmentMap[subsetSourcesIndex[i]]];
+    }
+    return res;
 }
 
 float StylizedCaustics::energy(float a, float b) {

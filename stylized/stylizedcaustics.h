@@ -22,6 +22,21 @@ public:
     void calculateAverageOrigin(const std::vector<Photon>& photons);
     Eigen::Vector3f getAverageOrigin() {return averageOrigin;}
 
+    std::vector<Eigen::Vector2f> getSubsetSourcesPos();
+    std::vector<Eigen::Vector2f> getSubsetTargetsPos();
+    std::vector<Eigen::Vector2f> getSources() {return sources;}
+    std::vector<Eigen::Vector2f> getTargets() {return targets;}
+
+    std::vector<Eigen::Vector2f> finalResults;
+    void setFinalResults(std::vector<Eigen::Vector2f>& B) {
+        finalResults.resize(m);
+        for(int i = 0; i < m; i++)
+        {
+            if(sourcesIndexInSubset.find(i) != sourcesIndexInSubset.end()) finalResults[i] = targets[assignmentMap[i]];
+            else finalResults[i] = B[i];
+        }
+    }
+
 private:
     float energy(float a, float b);
     void initializeMatrices();
@@ -33,15 +48,19 @@ private:
     int n;  // Number of points in subsets
     std::vector<Eigen::Vector2f> sources;  // Points of source caustics A
     std::vector<Eigen::Vector2f> targets;  // Points of target image B
-    std::vector<int> subsetSourcesIndex;
-    std::vector<int> subsetTargetsIndex;
-    std::unordered_map<int, int> sourcesIndexInSubset;
-    std::unordered_map<int, int> targetsIndexInSubset;
+    std::vector<int> subsetSourcesIndex;  // Index of chosen points
+    std::vector<int> subsetTargetsIndex;  // Index of chosen points
+    std::unordered_map<int, int> sourcesIndexInSubset;  // key is the index from vector sources, value is its index in sourcesIndexInSubset
+    std::unordered_map<int, int> targetsIndexInSubset;  // similar
     std::vector<int> assignmentMap;  // ith point in A should map to assignmentMap[i]th point in B
     Eigen::Vector3f averageOrigin;
 
+    // For greedy algorithm
     Eigen::MatrixXf DA, DB, DAB;
     float beta = 0.5;
+
+    // Results position after tps
+    std::vector<Eigen::Vector2f> tpsPos;
 
     std::vector<int> photonsMap;
 };
