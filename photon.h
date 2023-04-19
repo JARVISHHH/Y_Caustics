@@ -46,20 +46,20 @@ public:
     void get_nearest_photons(const vector<Photon>& photons, int index);
 };
 
-bool operator==(const Photon& a, const Photon& b)
-{
-    return a.origin == b.origin;
-}
+//inline bool operator==(const Photon& a, const Photon& b)
+//{
+//    return a.origin == b.origin;
+//}
 
-bool operator<(const Photon& a, const Photon& b)
-{
-    return a.origin[a.divide_axis] < b.origin[b.divide_axis];
-}
+//inline bool operator<(const Photon& a, const Photon& b)
+//{
+//    return a.origin[a.divide_axis] < b.origin[b.divide_axis];
+//}
 
-bool operator>(const Photon& a, const Photon& b)
-{
-    return a.origin[a.divide_axis] > b.origin[b.divide_axis];
-}
+//inline bool operator>(const Photon& a, const Photon& b)
+//{
+//    return a.origin[a.divide_axis] > b.origin[b.divide_axis];
+//}
 
 class PhotonMap
 {
@@ -75,7 +75,7 @@ public:
     void store(Photon p);
     float get_photon_origin_axis(int index, int axis);
     void split(std::vector<Photon>& photons_temp, int start, int end, int mid, int axis);
-    void remove(Photon p);
+//    void remove(Photon p);
     void update();
     void balance();
     void balance(std::vector<Photon>& photons_temp, int index, int start, int end);

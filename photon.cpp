@@ -137,30 +137,30 @@ void PhotonMap::balance(vector<Photon>& photons_temp, int index, int start, int 
     }
 }
 
-void PhotonMap::remove(Photon p){
-    int low = 0, high = static_cast<int>(photons.size()) - 1;
-    int index = -1;
+//void PhotonMap::remove(Photon p){
+//    int low = 0, high = static_cast<int>(photons.size()) - 1;
+//    int index = -1;
 
-    while (low <= high){
-        int mid = low + (high - low) / 2;
+//    while (low <= high){
+//        int mid = low + (high - low) / 2;
 
-        if (photons[mid] == p){
-            index = mid;
-            break;
-        }
+//        if (photons[mid] == p){
+//            index = mid;
+//            break;
+//        }
 
-        if (photons[mid] < p){
-            low = mid + 1;
-        } else {
-            high = mid - 1;
-        }
-    }
+//        if (photons[mid] < p){
+//            low = mid + 1;
+//        } else {
+//            high = mid - 1;
+//        }
+//    }
 
-    if (index != -1){
-        photons.erase(photons.begin() + index);
-        update();
-    }
-}
+//    if (index != -1){
+//        photons.erase(photons.begin() + index);
+//        update();
+//    }
+//}
 
 
 Eigen::Vector3f PhotonMap::getFixedRadiusIrradiance(Eigen::Vector3f origin, Eigen::Vector3f normal, float max_dist, int max_num, int min_num)
