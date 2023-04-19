@@ -14,6 +14,13 @@ typedef struct Photon {
     Eigen::Vector3f dir;    // incoming direction
 } Photon;
 
+struct photon_hash{
+    size_t operator()(const Photon& p) const {
+        // Combine the hashes of individual attributes using XOR and bit shifting
+        std::hash<float> float_hash;
+        return float_hash(p.origin.x()) ^ (float_hash(p.origin.y()) << 1) ^ (float_hash(p.origin.z()) << 2);
+     }
+};
 
 inline int calculate_mid(int start, int end)
 {
@@ -46,20 +53,20 @@ public:
     void get_nearest_photons(const vector<Photon>& photons, int index);
 };
 
-//inline bool operator==(const Photon& a, const Photon& b)
-//{
-//    return a.origin == b.origin;
-//}
+inline bool operator==(const Photon& a, const Photon& b)
+{
+    return a.origin == b.origin;
+}
 
-//inline bool operator<(const Photon& a, const Photon& b)
-//{
-//    return a.origin[a.divide_axis] < b.origin[b.divide_axis];
-//}
+inline bool operator<(const Photon& a, const Photon& b)
+{
+    return a.origin[a.divide_axis] < b.origin[b.divide_axis];
+}
 
-//inline bool operator>(const Photon& a, const Photon& b)
-//{
-//    return a.origin[a.divide_axis] > b.origin[b.divide_axis];
-//}
+inline bool operator>(const Photon& a, const Photon& b)
+{
+    return a.origin[a.divide_axis] > b.origin[b.divide_axis];
+}
 
 class PhotonMap
 {
@@ -75,7 +82,7 @@ public:
     void store(Photon p);
     float get_photon_origin_axis(int index, int axis);
     void split(std::vector<Photon>& photons_temp, int start, int end, int mid, int axis);
-//    void remove(Photon p);
+    void remove(Photon p);
     void update();
     void balance();
     void balance(std::vector<Photon>& photons_temp, int index, int start, int end);
