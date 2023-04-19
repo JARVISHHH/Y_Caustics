@@ -6,6 +6,10 @@
 #include <Eigen/Dense>
 #include <vector>
 #include <random>
+#include <unordered_map>
+#include <unordered_set>
+#include <set>
+#include <queue>
 
 class StylizedCaustics
 {
@@ -16,6 +20,7 @@ public:
     std::vector<Eigen::Vector2f> sample(int width, int height, std::string path);
     void project(const Scene& scene, const std::vector<Photon> photons, Plane& plane);
     void assign(std::vector<Eigen::Vector2f>& images);
+    void refine(std::vector<Eigen::Vector2f> I);
     std::vector<Eigen::Vector2f> move(float t = 0);
     void backProject(const Scene& scene, PhotonMap& pmap_caustic, Plane& plane, std::vector<Eigen::Vector2f>& currentPos);
 

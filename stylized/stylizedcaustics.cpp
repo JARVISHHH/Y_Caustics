@@ -1,5 +1,6 @@
 #include "stylizedcaustics.h"
 #include "imagesampler.h"
+#include "photon.h"
 
 #include <iostream>
 
@@ -7,6 +8,7 @@ extern bool useGreedyMethod;
 
 std::random_device rd;
 std::mt19937 g;
+using namespace Eigen;
 
 StylizedCaustics::StylizedCaustics() {
     g = std::mt19937(rd());
@@ -37,7 +39,7 @@ void StylizedCaustics::project(const Scene& scene, const std::vector<Photon> pho
     }
 }
 
-void StylizedCaustics::assign(std::vector<Eigen::Vector2f>& images) {
+void StylizedCaustics::assign(std::vector<Vector2f>& images) {
     m = sources.size();
     n = 300;  // TODO: user-define n
 
@@ -102,6 +104,58 @@ void StylizedCaustics::assign(std::vector<Eigen::Vector2f>& images) {
         // Greedy assign
         greedy();
     }
+}
+
+void StylizedCaustics::refine(vector<Vector2f> I){
+
+    // construt a balanced kd tree (PhotonMap) out of target
+    PhotonMap B = PhotonMap(targets.size());
+    for (const auto& t: targets){
+        // convert targets (vector<Vector2f>) to a vector<Photon> (y = 0)
+        Photon t_photon = Photon{Vector3f::Zero(), Vector3f(t(0), 0, t(1)), Vector3f::Zero(), 0};
+        B.store(t_photon);
+    }
+    B.update();
+
+    // construct a max heap containing the position b in B that is closest to each i in I
+    multiset<photons_dist, less<photons_dist>> distMaxHeap;
+    for (const auto& i : I){
+        Photon b = B.getNearestPhotonFrom(Vector3f(i(0), 0, i(1)), 0.1);
+        float distance = (i - Vector2f(b.origin(0), b.origin(2))).norm();
+        photons_dist ppd {b, Photon{Vector3f::Zero(), Vector3f(i(0), 0, i(1))}, distance * distance};
+        distMaxHeap.insert(ppd);
+    }
+
+    // iteratively choose the max disance from distMaxHeap and store pair
+    unordered_set<Vector2f> I_copy;
+    I_copy.insert(I.begin(), I.end());
+    unordered_map<Photon, Photon> h; // map i -> b
+    while (!I_copy.empty()){
+        photons_dist d = *distMaxHeap.begin();
+        Photon b = d.p1;
+        Photon i = d.p2;
+        h[b] = i;
+
+        B.remove(b);
+        I_copy.erase(I_copy.find(Vector2f(i.origin(0), i.origin(2))));
+
+        // update distMaxHeap: delete the first element w/ i
+        distMaxHeap.erase(distMaxHeap.begin());
+        // for all the objects in distMaxHeap, replace the b if b is deleted
+        multiset<photons_dist, less<photons_dist>> distMaxHeapTemp;
+        auto curr_it = distMaxHeap.begin();
+        while (curr_it != distMaxHeap.end()){
+            photons_dist curr = *curr_it;
+            if (curr.p1 == b){
+                curr.p1 = B.getNearestPhotonFrom(curr.p2.origin, 0.1);
+            }
+            distMaxHeap.insert(curr);
+            curr_it = next(curr_it);
+        }
+        distMaxHeap.swap(distMaxHeapTemp);
+    }
+
+
 }
 
 std::vector<Eigen::Vector2f> StylizedCaustics::move(float t) {

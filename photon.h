@@ -46,6 +46,20 @@ public:
     void get_nearest_photons(const vector<Photon>& photons, int index);
 };
 
+bool operator==(const Photon& a, const Photon& b)
+{
+    return a.origin == b.origin;
+}
+
+bool operator<(const Photon& a, const Photon& b)
+{
+    return a.origin[a.divide_axis] < b.origin[b.divide_axis];
+}
+
+bool operator>(const Photon& a, const Photon& b)
+{
+    return a.origin[a.divide_axis] > b.origin[b.divide_axis];
+}
 
 class PhotonMap
 {
@@ -61,13 +75,28 @@ public:
     void store(Photon p);
     float get_photon_origin_axis(int index, int axis);
     void split(std::vector<Photon>& photons_temp, int start, int end, int mid, int axis);
+    void remove(Photon p);
     void update();
     void balance();
     void balance(std::vector<Photon>& photons_temp, int index, int start, int end);
     Eigen::Vector3f getFixedRadiusIrradiance(Eigen::Vector3f origin, Eigen::Vector3f normal, float max_dist, int max_num, int min_num);
     Eigen::Vector3f getGaussianIrradiance(Eigen::Vector3f origin, Eigen::Vector3f normal, float max_dist, int max_num, int min_num);
     Eigen::Vector3f visualizePhotonMap(Eigen::Vector3f origin, float max_dist, int max_num);
+
+    Photon getNearestPhotonFrom(Eigen::Vector3f origin, float max_dist);
 };
+
+struct photons_dist
+{
+    Photon p1;
+    Photon p2;
+    float dist_square;
+};
+
+inline bool operator<(photons_dist d1, photons_dist d2)
+{
+    return d1.dist_square > d2.dist_square; // for the sake of making the multiset max heap
+}
 
 
 #endif // PHOTON_H

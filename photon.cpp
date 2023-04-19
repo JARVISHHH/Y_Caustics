@@ -137,6 +137,32 @@ void PhotonMap::balance(vector<Photon>& photons_temp, int index, int start, int 
     }
 }
 
+void PhotonMap::remove(Photon p){
+    int low = 0, high = static_cast<int>(photons.size()) - 1;
+    int index = -1;
+
+    while (low <= high){
+        int mid = low + (high - low) / 2;
+
+        if (photons[mid] == p){
+            index = mid;
+            break;
+        }
+
+        if (photons[mid] < p){
+            low = mid + 1;
+        } else {
+            high = mid - 1;
+        }
+    }
+
+    if (index != -1){
+        photons.erase(photons.begin() + index);
+        update();
+    }
+}
+
+
 Eigen::Vector3f PhotonMap::getFixedRadiusIrradiance(Eigen::Vector3f origin, Eigen::Vector3f normal, float max_dist, int max_num, int min_num)
 {
     Eigen::Vector3f res(0.0, 0.0, 0.0);
@@ -193,6 +219,10 @@ Eigen::Vector3f PhotonMap::visualizePhotonMap(Eigen::Vector3f origin, float max_
 }
 
 
-
+Photon PhotonMap::getNearestPhotonFrom(Eigen::Vector3f origin, float max_dist){
+    nearest_photons_map local_map = nearest_photons_map(origin, max_dist*max_dist, 1);
+    local_map.get_nearest_photons(photons, 0);
+    return local_map.nearest_photons.top().p;
+}
 
 
