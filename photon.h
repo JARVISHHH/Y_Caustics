@@ -22,6 +22,13 @@ struct photon_hash{
      }
 };
 
+//struct photon_equal {
+//    bool operator()(const Photon& lhs, const Photon& rhs) const {
+//        return lhs.origin == rhs.origin;
+//    }
+//};
+
+
 inline int calculate_mid(int start, int end)
 {
     int num = end - start + 1;
@@ -58,15 +65,15 @@ inline bool operator==(const Photon& a, const Photon& b)
     return a.origin == b.origin;
 }
 
-inline bool operator<(const Photon& a, const Photon& b)
-{
-    return a.origin[a.divide_axis] < b.origin[b.divide_axis];
-}
+//inline bool operator<(const Photon& a, const Photon& b)
+//{
+//    return a.origin[a.divide_axis] < b.origin[b.divide_axis];
+//}
 
-inline bool operator>(const Photon& a, const Photon& b)
-{
-    return a.origin[a.divide_axis] > b.origin[b.divide_axis];
-}
+//inline bool operator>(const Photon& a, const Photon& b)
+//{
+//    return a.origin[a.divide_axis] > b.origin[b.divide_axis];
+//}
 
 class PhotonMap
 {

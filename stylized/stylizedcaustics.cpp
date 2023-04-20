@@ -106,40 +106,52 @@ void StylizedCaustics::assign(std::vector<Vector2f>& images) {
     }
 }
 
+// given interpolation results ("positions"), populate assignmentmap
 void StylizedCaustics::refine(vector<Vector2f> positions){
 
     // construt a balanced kd tree (PhotonMap) out of target
-    PhotonMap B = PhotonMap(targets.size());
+    // also populate map (
+    PhotonMap B_PhotonMap = PhotonMap(targets.size());
+    unordered_map<Photon, int, photon_hash> B;
+    int b_index = 0;
     for (const auto& t: targets){
         // convert targets (vector<Vector2f>) to a vector<Photon> (y = 0)
         Photon t_photon = Photon{Vector3f::Zero(), Vector3f(t(0), 0, t(1)), Vector3f::Zero(), 0};
-        B.store(t_photon);
+        B_PhotonMap.store(t_photon);
+        B[t_photon] = b_index;
+        b_index++;
     }
-    B.update();
+    B_PhotonMap.update();
+    cout << "finished kd tree construction" << endl;
 
     // construct a max heap containing the position b in B that is closest to each pos in positions
     // also construct a set of Photons for the next loop
     multiset<photons_dist, less<photons_dist>> distMaxHeap;
-    unordered_set<Photon, photon_hash> I;
+    unordered_map<Photon, int, photon_hash> I; // Photons in positions mapped to their indices
+    int index = 0;
     for (const auto& pos : positions){
         Vector3f i_vec(pos(0), 0, pos(1));
         Photon i = Photon{Vector3f::Zero(), i_vec};
-        Photon b = B.getNearestPhotonFrom(i_vec, 0.1);
+        Photon b = B_PhotonMap.getNearestPhotonFrom(i_vec, 0.1);
+//        cout << "here" << endl;
         float distance = (pos - Vector2f(b.origin(0), b.origin(2))).norm();
         photons_dist ppd {b, i, distance * distance};
         distMaxHeap.insert(ppd);
-        I.insert(i);
+        I[i] = index;
+        cout << "iteration: " << index << endl;
+        index++;
     }
+    cout << "finished dist max heap construction" << endl;
 
     // iteratively choose the max disance from distMaxHeap and store pair
-    unordered_map<Photon, Photon, photon_hash> h; // map i -> b
+//    unordered_map<Photon, Photon, photon_hash> h; // map i -> b
     while (!I.empty()){
         photons_dist d = *distMaxHeap.begin();
         Photon b = d.p1;
         Photon i = d.p2;
-        h[b] = i;
+        assignmentMap[B[b]] = I[i];
 
-        B.remove(b);
+        B_PhotonMap.remove(b);
         I.erase(I.find(i));
 
         // update distMaxHeap: delete the first element w/ i
@@ -149,14 +161,15 @@ void StylizedCaustics::refine(vector<Vector2f> positions){
         auto curr_it = distMaxHeap.begin();
         while (curr_it != distMaxHeap.end()){
             photons_dist curr = *curr_it;
-            if (curr.p1 == b){
-                curr.p1 = B.getNearestPhotonFrom(curr.p2.origin, 0.1);
+            if (curr.p1.origin == b.origin){
+                curr.p1 = B_PhotonMap.getNearestPhotonFrom(curr.p2.origin, 0.1);
             }
             distMaxHeap.insert(curr);
             curr_it = next(curr_it);
         }
         distMaxHeap.swap(distMaxHeapTemp);
     }
+    cout << "finished iteration" << endl;
 }
 
 std::vector<Eigen::Vector2f> StylizedCaustics::move(float t) {
