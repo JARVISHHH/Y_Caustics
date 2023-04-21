@@ -1,103 +1,76 @@
 #include "tps.h"
-#include <iostream>
-#include "Eigen/Dense"
-
 #include <Eigen/QR>
+#include <iostream>
 
-void tps::init(std::vector<Eigen::Vector2f> constraints, std::vector<Eigen::Vector2f> destinations){
-    _constraints = constraints;
-    _destinations = destinations;
+ThinPlateSpline::ThinPlateSpline(std::vector<Eigen::Vector3d> &src, std::vector<Eigen::Vector3d> &dst) {
 
-    if(_constraints.size() != _destinations.size()){
-        std::cout <<"destinations must have the same size as constrains";
-        return;
+    mSrcPoints = src;
+    mDstPoints = dst;
+    solve();
+}
+
+void ThinPlateSpline::solve() {
+
+  if (mSrcPoints.size() != mDstPoints.size()){
+      std::cout <<"must have same constraints as targets";
+      return;
+  }
+
+  build_VO();
+  build_mL();
+  mW = mL.colPivHouseholderQr().solve(VO);
+}
+
+Eigen::Vector3d ThinPlateSpline::interpolate(const Eigen::Vector3d &p) const {
+
+  Eigen::Vector3d res = Eigen::Vector3d::Zero();
+  int i = 0;
+
+  for (; i < mW.rows() - (3 + 1); ++i) {
+    double rb = radialBasis((mSrcPoints[std::size_t(i)] - p).norm());
+    res += mW.row(i) * rb;
+  }
+
+  res += mW.row(i);
+  i++;
+
+  for (int j(0); j < 3; ++j, ++i)
+    res += mW.row(i) * p[j];
+
+  return res;
+}
+
+void ThinPlateSpline::build_VO(){
+    const int num(int(mSrcPoints.size()));
+    const int rows(num + 3 + 1);
+
+   VO = Eigen::MatrixXd::Zero(rows, 3);
+
+    for (int i(0); i < num; ++i){
+      VO.row(i) = mDstPoints[std::size_t(i)];
     }
-    prepare_mW();
 }
 
+void ThinPlateSpline::build_mL(){
+    const int num(int(mSrcPoints.size()));
+    const int rows(num + 3 + 1);
 
-Eigen::Vector2f tps::tps_solve(Eigen::Vector2f p){
+    mL = Eigen::MatrixXd::Zero(rows, rows);
 
-    Eigen::Vector2f res = Eigen::Vector2f::Zero();
-    int n = _constraints.size();
+    for (int i(0); i < num; i++) {
 
-    for(int i=0; i<n; i++){
-        float dist = distance(p, _constraints[i]);
-        float u = U(dist);
-        res += _mW.row(i) * u;
-    }
+      int j = i + 1;
 
-    res += _mW.row(n);
-    res += _mW.row(n+1) * p[0];
-    res += _mW.row(n+2) * p[1];
+      for (; j < num; ++j)
+        mL(i, j) = mL(j, i) = radialBasis(
+            (mSrcPoints[std::size_t(i)] - mSrcPoints[std::size_t(j)]).norm());
 
-    return res;
-}
+      mL(j, i) = mL(i, j) = 1.0;
+      j+=1;
 
-
-float tps::distance(Eigen::Vector2f v1, Eigen::Vector2f v2){
-    Eigen::Vector2f diff = v1 - v2;
-    return sqrt(v1[0]*v1[0] + v2[0]*v2[0]);
-}
-
-float tps::U(float r){
-    return r*r*log(r);
-}
-
-
-Eigen::MatrixXf tps::build_L(){
-
-    int n = _constraints.size();
-    int rows = _constraints.size() + 3;
-
-    Eigen::MatrixXf L = Eigen::MatrixXf::Zero(rows, rows);
-
-    for(int i=0; i<n; i++){
-        for(int j=0; j<n; j++){
-
-            if(i == j){
-                L(i,j) = 0;
-            }else{
-                float dist = distance(_constraints[i], _constraints[j]);
-                L(i,j) = U(dist);
-            }
-        }
-
-        L(i, n) = 1.0;
-        L(n,i)= 1.0;
-    }
-
-    for(int i=0; i<n; i++){
-        L(n+1, i) = _constraints[i][0];
-        L(n+2, i) = _constraints[i][1];
-
-        L(i, n+1) = _constraints[i][0];
-        L(i, n+2) = _constraints[i][1];
-    }
-
-    return L;
-}
-
-
-Eigen::MatrixXf tps::build_VO(){
-    int n = _destinations.size();
-    int rows = _destinations.size() + 3;
-    Eigen::MatrixXf VO = Eigen::MatrixXf::Zero(rows, 3);
-
-    for(int i=0; i<n; i++){
-        VO(i,0) = _destinations[i][0];
-        VO(i,1) = _destinations[i][1];
+      for (int posElm(0); j < rows; ++posElm, ++j){
+          mL(j, i) = mL(i, j) = mSrcPoints[std::size_t(i)][posElm];
+      }
     }
 
-    return VO;
 }
-
-
-void tps::prepare_mW(){
-    Eigen::MatrixXf L = build_L();
-    Eigen::MatrixXf VO = build_VO();
-
-    _mW = L.colPivHouseholderQr().solve(VO);
-
-}
-

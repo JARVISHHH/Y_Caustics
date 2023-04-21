@@ -63,10 +63,16 @@ PathTracer::PathTracer(Scene *scene,
             std::vector<Eigen::Vector2f> A_sample = stylizedCaustics.getSubsetSourcesPos();
             std::vector<Eigen::Vector2f> B_sample = stylizedCaustics.getSubsetTargetsPos();
 
+            std::vector<Eigen::Vector3d> A_sample_tps;
+            std::vector<Eigen::Vector3d> B_sample_tps;
+
+            for(int i=0; i<A_sample.size(); i++){
+                A_sample_tps.push_back(Eigen::Vector3d(A_sample[i][0], A_sample[i][1],0));
+                B_sample_tps.push_back(Eigen::Vector3d(B_sample[i][0], B_sample[i][1],0));
+            }
             //Do TPS here
             //step 1: init tps
-            tps tpsSolver;
-            tpsSolver.init(A_sample, B_sample);
+            ThinPlateSpline m_tps(A_sample_tps, B_sample_tps);
 
             //step 2: use tps to find the position of rest n-300 points
             //Let std::vector<Eigen::Vector2f> A_rest be the position of these n-300 points
@@ -74,9 +80,11 @@ PathTracer::PathTracer(Scene *scene,
 
             std::vector<Eigen::Vector2f> A = stylizedCaustics.getSources();
             std::vector<Eigen::Vector2f> B(A.size());
+            std::cout <<"A.size()" << A.size() << std::endl;
             for(int i = 0; i< A.size(); i++){
-                Eigen::Vector2f result = tpsSolver.tps_solve(A[i]);
-                B[i] = result;
+                Eigen::Vector3d tempt(A[i][0], A[i][1], 0);
+                Eigen::Vector3d result = m_tps.interpolate(tempt);
+                B[i] = Eigen::Vector2f(result[0], result[1]);
             }
             stylizedCaustics.setFinalResults(B);
 

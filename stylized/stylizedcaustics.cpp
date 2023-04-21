@@ -78,8 +78,12 @@ void StylizedCaustics::assign(std::vector<Vector2f>& images) {
     std::vector<int> sampleIndex(m);
     for(int i = 0; i < m; i++) sampleIndex[i] = i;
     std::shuffle(sampleIndex.begin(), sampleIndex.end(), g);
+
+    //subsetSourcesIndex = A'
     for(int i = 0; i < n; i++) subsetSourcesIndex[i] = sampleIndex[i];
     std::shuffle(sampleIndex.begin(), sampleIndex.end(), g);
+
+    //subsetSourcesIndex = B'
     for(int i = 0; i < n; i++) subsetTargetsIndex[i] = sampleIndex[i];
 
     // Initialize assignment map
