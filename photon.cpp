@@ -11,6 +11,7 @@ static double gaussianFilter(double dist, double maxDist) {
 
 void nearest_photons_map::get_nearest_photons(const vector<Photon>& photons, int index)
 {
+
     Photon cur_photon = photons[index];
     if (2 * index + 1 < photons.size())
     {
@@ -149,7 +150,7 @@ void PhotonMap::remove(Photon p){
             break;
         }
 
-        if (photons[mid] < p){
+        if (photons[mid].origin[photons[mid].divide_axis] < p.origin[p.divide_axis]){
             low = mid + 1;
         } else {
             high = mid - 1;
@@ -222,6 +223,7 @@ Eigen::Vector3f PhotonMap::visualizePhotonMap(Eigen::Vector3f origin, float max_
 Photon PhotonMap::getNearestPhotonFrom(Eigen::Vector3f origin, float max_dist){
     nearest_photons_map local_map = nearest_photons_map(origin, max_dist*max_dist, 1);
     local_map.get_nearest_photons(photons, 0);
+//    cout << "got nearest photon!" << endl;
     return local_map.nearest_photons.top().p;
 }
 

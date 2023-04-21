@@ -48,10 +48,10 @@ PathTracer::PathTracer(Scene *scene,
             stylizedCaustics.calculateAverageOrigin(photons);
             // (2) calculate 2d coordinates
             stylizedCaustics.project(*scene, photons, plane);
-            std::cout << "Finish project" << std::endl;
+            std::cout << "Finished projection" << std::endl;
             // Assign (Greedy algorithm)
             stylizedCaustics.assign(imageSamples);
-            std::cout << "Finish assign" << std::endl;
+            std::cout << "Finished assign" << std::endl;
 
             //For Yingtong
             //You have set A (n points), and you sample 300 points from A
@@ -87,6 +87,7 @@ PathTracer::PathTracer(Scene *scene,
                 B[i] = Eigen::Vector2f(result[0], result[1]);
             }
             stylizedCaustics.setFinalResults(B);
+            std::cout << "Finished interpolation " << std::endl;
 
             //For Yutang
             // Note from Yingtong: I didn't declare B_rest above, stylizedCaustics.finalResults contains all n points. I can modify the code if it's not convenient.
@@ -95,8 +96,12 @@ PathTracer::PathTracer(Scene *scene,
             //Do refinement here
             // Note from Yingtong: Guess refinement is better to be a member function of class StylizedCaustics, since all data is stored in StylizedCaustics.
             // or make the stylizedCaustics a parameter of the function
-
             // To show the final result, go to move() function in stylizedcaustics.cpp, uncomment the final results code, and comment the results after tps
+
+
+            // Yutang: THIS DOES NOT WORK YET SO DON'T RUN IT
+//            stylizedCaustics.refine(stylizedCaustics.finalResults);
+
 
         }
     }
