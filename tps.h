@@ -1,32 +1,30 @@
 #pragma once
 
-#include <vector>
 #include <Eigen/Core>
-#include <Eigen/Dense>
+#include <Eigen/StdVector>
 
-class tps
-{
+class ThinPlateSpline {
 public:
 
-    void init(std::vector<Eigen::Vector2f> constraints, std::vector<Eigen::Vector2f> destinations);
+  ThinPlateSpline(std::vector<Eigen::Vector3d> &src, std::vector<Eigen::Vector3d> &dst);
 
-    Eigen::Vector2f tps_solve(Eigen::Vector2f p);
+  Eigen::Vector3d interpolate(const Eigen::Vector3d &p) const;
+
 
 private:
 
-    std::vector<Eigen::Vector2f> _constraints;
-    std::vector<Eigen::Vector2f> _destinations;
+  void build_VO();
+  void build_mL();
+  void solve();
 
-    Eigen::MatrixXf _mW;
+  static inline double radialBasis(double r) {
+    return r == 0.0 ? r : r * r * log(r);
+  }
 
-    float distance(Eigen::Vector2f v1, Eigen::Vector2f v2);
-
-    float U(float r);
-
-    Eigen::MatrixXf build_L();
-
-    Eigen::MatrixXf build_VO();
-
-    void prepare_mW();
+  std::vector<Eigen::Vector3d> mSrcPoints;
+  std::vector<Eigen::Vector3d> mDstPoints;
+  Eigen::MatrixXd mW;
+  Eigen::MatrixXd mL;
+  Eigen::MatrixXd VO;
 
 };
