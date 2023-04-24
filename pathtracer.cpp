@@ -13,7 +13,7 @@
 using namespace Eigen;
 
 bool doStylizedCaustics = true;
-bool useGreedyMethod = false;
+bool useGreedyMethod = true;
 
 const double albedo = 0.75;
 PathTracer::PathTracer(Scene *scene,
@@ -38,11 +38,11 @@ PathTracer::PathTracer(Scene *scene,
     if (m_usePhotonMapping) {
         generatePhotons(*scene);
         if(doStylizedCaustics) {
-            stylizedCaustics = StylizedCaustics(2, 1.5);
+            stylizedCaustics = StylizedCaustics(3, 6);
             // Sample images
-            auto imageSamples = stylizedCaustics.sample(531, 171, caustic_img);
+            auto imageSamples = stylizedCaustics.sample(caustic_img);
             // Set plane
-            plane = Plane(0, Eigen::Vector3f(0, 0, 2), Eigen::Vector3f(0, 1, 0));
+            plane = Plane(0, Eigen::Vector3f(0.05, 0, 3), Eigen::Vector3f(0, 1, 0));
             // Projection
             auto& photons = pmap_caustic.photons;
             // (1) calculate average origin
@@ -81,7 +81,7 @@ PathTracer::PathTracer(Scene *scene,
 
             std::vector<Eigen::Vector2f> A = stylizedCaustics.getSources();
             std::vector<Eigen::Vector2f> B(A.size());
-            std::cout <<"A.size()" << A.size() << std::endl;
+            std::cout <<"A.size() " << A.size() << std::endl;
             for(int i = 0; i< A.size(); i++){
                 Eigen::Vector3d tempt(A[i][0], A[i][1], 0);
                 Eigen::Vector3d result = m_tps.interpolate(tempt);

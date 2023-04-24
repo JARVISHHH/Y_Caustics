@@ -20,9 +20,9 @@ StylizedCaustics::StylizedCaustics(float width, float height)
     g = std::mt19937(rd());
 }
 
-std::vector<Eigen::Vector2f> StylizedCaustics::sample(int imageWidth, int imageHeight, std::string path) {
+std::vector<Eigen::Vector2f> StylizedCaustics::sample(std::string path) {
     ImageSampler imageSampler(width, height);
-    return imageSampler.sample(imageWidth, imageHeight, path);
+    return imageSampler.sample(path);
 }
 
 void StylizedCaustics::project(const Scene& scene, const std::vector<Photon> photons, Plane& plane) {

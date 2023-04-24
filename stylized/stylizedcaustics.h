@@ -16,7 +16,7 @@ public:
     StylizedCaustics();
     StylizedCaustics(float width, float height);
 
-    std::vector<Eigen::Vector2f> sample(int width, int height, std::string path);
+    std::vector<Eigen::Vector2f> sample(std::string path);
     void project(const Scene& scene, const std::vector<Photon> photons, Plane& plane);
     void assign(std::vector<Eigen::Vector2f>& images);
     void refine(std::vector<Eigen::Vector2f> I);

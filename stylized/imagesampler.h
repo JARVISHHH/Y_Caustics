@@ -10,7 +10,7 @@ class ImageSampler
 public:
     ImageSampler(float width, float height);
 
-    std::vector<Eigen::Vector2f> sample(int imageWidth, int imageHeight, std::string path);
+    std::vector<Eigen::Vector2f> sample(std::string path);
 
 private:
     float width, height;
