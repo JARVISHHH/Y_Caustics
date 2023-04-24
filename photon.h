@@ -22,13 +22,6 @@ struct photon_hash{
      }
 };
 
-//struct photon_equal {
-//    bool operator()(const Photon& lhs, const Photon& rhs) const {
-//        return lhs.origin == rhs.origin;
-//    }
-//};
-
-
 inline int calculate_mid(int start, int end)
 {
     int num = end - start + 1;

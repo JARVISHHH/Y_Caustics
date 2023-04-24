@@ -154,7 +154,7 @@ void StylizedCaustics::refine(vector<Vector2f> positions){
         assignmentMap[B[b]] = I[i]; //store in assignment map
 
         B_PhotonMap.remove(b);
-        I.erase(I.find(i));
+        I.erase(I.find(i)); // O(log n)
 
         // update distMaxHeap: delete the first element w/ i
         distMaxHeap.erase(distMaxHeap.begin());

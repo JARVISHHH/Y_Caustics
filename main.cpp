@@ -27,15 +27,16 @@ int main(int argc, char *argv[])
     parser.process(a);
 
     const QStringList args = parser.positionalArguments();
-    if(args.size() != 2 && args.size() != 3) {
+    if(args.size() != 3 && args.size() != 4) {
         std::cerr << "Error: Wrong number of arguments" << std::endl;
         a.exit(1);
         return 1;
     }
     QString scenefile = args[0];
     QString output = args[1];
+    QString caustic_img = args[2];
     QString timeStepString = "-1";
-    if(args.size() == 3) timeStepString = args[2];
+    if(args.size() == 4) timeStepString = args[3];
 
     bool usePhotonMapping = true;
     int samplePerPixel = 1;
@@ -50,9 +51,11 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    PathTracer tracer(scene, IMAGE_WIDTH, IMAGE_HEIGHT, usePhotonMapping, samplePerPixel, defocusBlurOn, useOrenNayerBRDF, importanceSampling);
+    PathTracer tracer(scene, IMAGE_WIDTH, IMAGE_HEIGHT, caustic_img.toStdString(),
+                      usePhotonMapping, samplePerPixel,
+                      defocusBlurOn, useOrenNayerBRDF, importanceSampling);
 
-    if(args.size() == 2) {
+    if(args.size() == 3) {
         QImage image(IMAGE_WIDTH, IMAGE_HEIGHT, QImage::Format_RGB32);
 
         QRgb *data = reinterpret_cast<QRgb *>(image.bits());
@@ -72,7 +75,7 @@ int main(int argc, char *argv[])
         }
         delete scene;
     }
-    else if(args.size() == 3) {
+    else if(args.size() == 4) {
         float timeStep = timeStepString.toFloat();
         for(int i = 0; i <= 1; i++) {
             QImage image(IMAGE_WIDTH, IMAGE_HEIGHT, QImage::Format_RGB32);

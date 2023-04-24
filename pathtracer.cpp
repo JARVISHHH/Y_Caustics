@@ -19,6 +19,7 @@ const double albedo = 0.75;
 PathTracer::PathTracer(Scene *scene,
                        int width,
                        int height,
+                       std::string caustic_img,
                        bool usePhotonMapping,
                        int samplePerPixel,
                        bool defocusBlurOn,
@@ -39,7 +40,7 @@ PathTracer::PathTracer(Scene *scene,
         if(doStylizedCaustics) {
             stylizedCaustics = StylizedCaustics(2, 1.5);
             // Sample images
-            auto imageSamples = stylizedCaustics.sample(531, 171, "./example-scenes/images/CS2240.png");
+            auto imageSamples = stylizedCaustics.sample(531, 171, caustic_img);
             // Set plane
             plane = Plane(0, Eigen::Vector3f(0, 0, 2), Eigen::Vector3f(0, 1, 0));
             // Projection
@@ -97,12 +98,7 @@ PathTracer::PathTracer(Scene *scene,
             // Note from Yingtong: Guess refinement is better to be a member function of class StylizedCaustics, since all data is stored in StylizedCaustics.
             // or make the stylizedCaustics a parameter of the function
             // To show the final result, go to move() function in stylizedcaustics.cpp, uncomment the final results code, and comment the results after tps
-
-
-            // Yutang: THIS DOES NOT WORK YET SO DON'T RUN IT
             stylizedCaustics.refine(stylizedCaustics.finalResults);
-
-
         }
     }
 }
