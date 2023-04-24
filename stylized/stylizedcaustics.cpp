@@ -114,7 +114,7 @@ void StylizedCaustics::assign(std::vector<Vector2f>& images) {
 void StylizedCaustics::refine(vector<Vector2f> positions){
 
     // construt a balanced kd tree (PhotonMap) out of target
-    // also populate map (
+    // also populate map
     PhotonMap B_PhotonMap = PhotonMap(targets.size());
     unordered_map<Photon, int, photon_hash> B;
     int b_index = 0;
@@ -130,7 +130,8 @@ void StylizedCaustics::refine(vector<Vector2f> positions){
 
     // construct a max heap containing the position b in B that is closest to each pos in positions
     // also construct a set of Photons for the next loop
-    multiset<photons_dist, less<photons_dist>> distMaxHeap;
+//    multiset<photons_dist, less<photons_dist>> distMaxHeap;
+    set<photons_dist, photons_dist_compare> distMaxHeapSet;
     unordered_map<Photon, int, photon_hash> I; // Photons in positions mapped to their indices
     int index = 0;
     for (const auto& pos : positions){
@@ -139,37 +140,51 @@ void StylizedCaustics::refine(vector<Vector2f> positions){
         Photon b = B_PhotonMap.getNearestPhotonFrom(i_vec);
         float distance = (pos - Vector2f(b.origin(0), b.origin(2))).norm();
         photons_dist ppd {b, i, distance * distance};
-        distMaxHeap.insert(ppd);
+//        distMaxHeap.insert(ppd);
+        distMaxHeapSet.insert(ppd);
         I[i] = index;
-//        cout << "iteration: " << index << endl;
         index++;
     }
     cout << "finished dist max heap construction" << endl;
 
     // iteratively choose the max disance from distMaxHeap and store pair
     while (!I.empty()){
-        photons_dist d = *distMaxHeap.begin();
+//        photons_dist d = *distMaxHeap.begin();
+        photons_dist d = *distMaxHeapSet.begin();
         Photon b = d.p1;
         Photon i = d.p2;
         assignmentMap[B[b]] = I[i]; //store in assignment map
 
         B_PhotonMap.remove(b);
-        I.erase(I.find(i)); // O(log n)
+        I.erase(I.find(i));
 
         // update distMaxHeap: delete the first element w/ i
-        distMaxHeap.erase(distMaxHeap.begin());
+//        distMaxHeap.erase(distMaxHeap.begin());
+        distMaxHeapSet.erase(distMaxHeapSet.begin());
         // for all the objects in distMaxHeap, replace the b if b is deleted
-        multiset<photons_dist, less<photons_dist>> distMaxHeapTemp;
-        auto curr_it = distMaxHeap.begin();
-        while (curr_it != distMaxHeap.end()){
-            photons_dist curr = *curr_it;
-            if (curr.p1.origin == b.origin){
-                curr.p1 = B_PhotonMap.getNearestPhotonFrom(curr.p2.origin);
+//        multiset<photons_dist, less<photons_dist>> distMaxHeapTemp;
+//        auto curr_it = distMaxHeap.begin();
+//        while (curr_it != distMaxHeap.end()){
+//            photons_dist curr = *curr_it;
+//            if (curr.p1.origin == b.origin){
+//                curr.p1 = B_PhotonMap.getNearestPhotonFrom(curr.p2.origin);
+//            }
+//            distMaxHeapTemp.insert(curr);
+//            curr_it = next(curr_it);
+//        }
+//        distMaxHeap.swap(distMaxHeapTemp);
+        for(auto it = distMaxHeapSet.begin(); it != distMaxHeapSet.end(); ) {
+            if (it->p1.origin == b.origin) {
+                Photon new_b = B_PhotonMap.getNearestPhotonFrom(it->p2.origin);
+                float new_distance = (Vector2f(new_b.origin(0), new_b.origin(2)) - Vector2f(it->p2.origin(0), it->p2.origin(2))).norm();
+                photons_dist updated_element{new_b, it->p2, new_distance * new_distance};
+                it = distMaxHeapSet.erase(it);
+                distMaxHeapSet.insert(updated_element);
+            } else {
+                ++it;
             }
-            distMaxHeapTemp.insert(curr);
-            curr_it = next(curr_it);
         }
-        distMaxHeap.swap(distMaxHeapTemp);
+
 //        cout << "I.size()=" << I.size() << endl;
     }
     cout << "finished iteration" << endl;

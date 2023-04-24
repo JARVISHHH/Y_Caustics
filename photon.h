@@ -108,5 +108,20 @@ inline bool operator<(photons_dist d1, photons_dist d2)
     return d1.dist_square > d2.dist_square; // for the sake of making the multiset max heap
 }
 
+struct photons_dist_compare {
+    bool operator()(const photons_dist& lhs, const photons_dist& rhs) const {
+        if (lhs.dist_square == rhs.dist_square) {
+            if (lhs.p2.origin(0) != rhs.p2.origin(0)) {
+                return lhs.p2.origin(0) < rhs.p2.origin(0);
+            } else if (lhs.p2.origin(1) != rhs.p2.origin(1)) {
+                return lhs.p2.origin(1) < rhs.p2.origin(1);
+            } else {
+                return lhs.p2.origin(2) < rhs.p2.origin(2);
+            }
+        }
+        return lhs.dist_square < rhs.dist_square;
+    }
+};
+
 
 #endif // PHOTON_H

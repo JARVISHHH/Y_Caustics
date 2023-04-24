@@ -185,7 +185,7 @@ void PhotonMap::remove(Photon p){
 
     if (index != -1){
         photons.erase(photons.begin() + index);
-        update();
+//        update();
     }
 }
 
