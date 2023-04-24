@@ -136,24 +136,22 @@ void StylizedCaustics::refine(vector<Vector2f> positions){
     for (const auto& pos : positions){
         Vector3f i_vec(pos(0), 0, pos(1));
         Photon i = Photon{Vector3f::Zero(), i_vec};
-        Photon b = B_PhotonMap.getNearestPhotonFrom(i_vec, 0.1);
-//        cout << "here" << endl;
+        Photon b = B_PhotonMap.getNearestPhotonFrom(i_vec);
         float distance = (pos - Vector2f(b.origin(0), b.origin(2))).norm();
         photons_dist ppd {b, i, distance * distance};
         distMaxHeap.insert(ppd);
         I[i] = index;
-        cout << "iteration: " << index << endl;
+//        cout << "iteration: " << index << endl;
         index++;
     }
     cout << "finished dist max heap construction" << endl;
 
     // iteratively choose the max disance from distMaxHeap and store pair
-//    unordered_map<Photon, Photon, photon_hash> h; // map i -> b
     while (!I.empty()){
         photons_dist d = *distMaxHeap.begin();
         Photon b = d.p1;
         Photon i = d.p2;
-        assignmentMap[B[b]] = I[i];
+        assignmentMap[B[b]] = I[i]; //store in assignment map
 
         B_PhotonMap.remove(b);
         I.erase(I.find(i));
@@ -166,12 +164,13 @@ void StylizedCaustics::refine(vector<Vector2f> positions){
         while (curr_it != distMaxHeap.end()){
             photons_dist curr = *curr_it;
             if (curr.p1.origin == b.origin){
-                curr.p1 = B_PhotonMap.getNearestPhotonFrom(curr.p2.origin, 0.1);
+                curr.p1 = B_PhotonMap.getNearestPhotonFrom(curr.p2.origin);
             }
-            distMaxHeap.insert(curr);
+            distMaxHeapTemp.insert(curr);
             curr_it = next(curr_it);
         }
         distMaxHeap.swap(distMaxHeapTemp);
+//        cout << "I.size()=" << I.size() << endl;
     }
     cout << "finished iteration" << endl;
 }
@@ -180,9 +179,9 @@ std::vector<Eigen::Vector2f> StylizedCaustics::move(float t) {
     std::vector<Eigen::Vector2f> res(sources.size());
     for(int i = 0; i < sources.size(); i++) {
         // results after tps
-        res[i] = t * (finalResults[i] - sources[i]) + sources[i];
+//        res[i] = t * (finalResults[i] - sources[i]) + sources[i];
         // final results
-//        res[i] = t * (targets[assignmentMap[i]] - sources[i]) + sources[i];
+        res[i] = t * (targets[assignmentMap[i]] - sources[i]) + sources[i];
     }
     return res;
 }

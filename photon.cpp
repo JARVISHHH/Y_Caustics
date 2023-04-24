@@ -31,6 +31,32 @@ void nearest_photons_map::get_nearest_photons(const vector<Photon>& photons, int
         nearest_photons.pop();
 }
 
+void nearest_photons_map::get_nearest_photon(const vector<Photon>& photons, int index)
+{
+    if (index >= photons.size()) {
+        return;
+    }
+
+    Photon cur_photon = photons[index];
+
+    if (2 * index + 1 < photons.size())
+    {
+        double dist_axis = origin[cur_photon.divide_axis] - cur_photon.origin[cur_photon.divide_axis];
+        if (dist_axis < 0)
+            get_nearest_photons(photons, 2 * index + 1);
+        else
+            get_nearest_photons(photons, 2 * index + 2);
+    }
+
+    float cur_dist_square = (cur_photon.origin - origin).squaredNorm();
+    if (cur_dist_square < min_dist_square)
+    {
+        min_dist_square = cur_dist_square;
+        nearest_photon = cur_photon;
+    }
+}
+
+
 PhotonMap::PhotonMap(int _maxPhotonNum) : maxPhotonNum(_maxPhotonNum)
 {
     box_min = Eigen::Vector3f(1000000.0, 1000000.0, 1000000.0);
@@ -220,11 +246,11 @@ Eigen::Vector3f PhotonMap::visualizePhotonMap(Eigen::Vector3f origin, float max_
 }
 
 
-Photon PhotonMap::getNearestPhotonFrom(Eigen::Vector3f origin, float max_dist){
-    nearest_photons_map local_map = nearest_photons_map(origin, max_dist*max_dist, 1);
-    local_map.get_nearest_photons(photons, 0);
-//    cout << "got nearest photon!" << endl;
-    return local_map.nearest_photons.top().p;
+Photon PhotonMap::getNearestPhotonFrom(Eigen::Vector3f origin){
+    nearest_photons_map local_map = nearest_photons_map(origin, 0, 1);
+    local_map.get_nearest_photon(photons, 0);
+    Photon out = local_map.nearest_photon;
+    return out;
 }
 
 

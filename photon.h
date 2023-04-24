@@ -55,9 +55,12 @@ public:
     int max_num;
     float max_dist_square;
     priority_queue<photon_dist, vector<photon_dist>, less<photon_dist>> nearest_photons;
-    nearest_photons_map(Eigen::Vector3f _origin, float _max_dist_square, int _max_num = 0) : origin(_origin), max_dist_square(_max_dist_square), max_num(_max_num) {}
+    Photon nearest_photon;
+    float min_dist_square;
+    nearest_photons_map(Eigen::Vector3f _origin, float _max_dist_square, int _max_num = 0) : origin(_origin), max_dist_square(_max_dist_square), max_num(_max_num), min_dist_square(std::numeric_limits<float>::max()) {}
 
     void get_nearest_photons(const vector<Photon>& photons, int index);
+    void get_nearest_photon(const vector<Photon>& photons, int index);
 };
 
 inline bool operator==(const Photon& a, const Photon& b)
@@ -97,7 +100,7 @@ public:
     Eigen::Vector3f getGaussianIrradiance(Eigen::Vector3f origin, Eigen::Vector3f normal, float max_dist, int max_num, int min_num);
     Eigen::Vector3f visualizePhotonMap(Eigen::Vector3f origin, float max_dist, int max_num);
 
-    Photon getNearestPhotonFrom(Eigen::Vector3f origin, float max_dist);
+    Photon getNearestPhotonFrom(Eigen::Vector3f origin);
 };
 
 struct photons_dist

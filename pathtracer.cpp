@@ -100,7 +100,7 @@ PathTracer::PathTracer(Scene *scene,
 
 
             // Yutang: THIS DOES NOT WORK YET SO DON'T RUN IT
-//            stylizedCaustics.refine(stylizedCaustics.finalResults);
+            stylizedCaustics.refine(stylizedCaustics.finalResults);
 
 
         }
