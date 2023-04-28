@@ -1,7 +1,7 @@
 #include "stylizedcaustics.h"
 #include "imagesampler.h"
 #include "photon.h"
-
+#include "spline.h"
 #include <iostream>
 
 extern bool useGreedyMethod;
@@ -196,6 +196,20 @@ std::vector<Eigen::Vector2f> StylizedCaustics::move(float t) {
         // results after tps
 //        res[i] = t * (finalResults[i] - sources[i]) + sources[i];
         // final results
+
+        //Assume we move point A to point B
+//        Eigen::Vector2f A = sources[i];
+//        Eigen::Vector2f B = targets[assignmentMap[i]];
+//        Eigen::Vector2f mid ((A[0] + B[0])/2 , (A[1] + B[1])/2);
+
+//        std::vector<double> X = {(double)A[0], (double)mid[0], (double)B[0]};
+//        std::vector<double> Y = {(double)A[1], (double)mid[1], (double)B[1]};
+//        tk::spline spline(X,Y);
+//        double target_x = A[0] + t*(A[0] - B[0]);
+//        double target_y = spline(target_x);
+
+//        Eigen::Vector2f result((float)target_x, (float)target_y);
+
         res[i] = t * (targets[assignmentMap[i]] - sources[i]) + sources[i];
     }
     return res;
