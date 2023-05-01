@@ -82,6 +82,7 @@ add_executable(${PROJECT_NAME}
     photonmapping.h
     integrator.h
     tps.h
+    tonemapper.h
 
     stylized/projection/plane.h stylized/projection/plane.cpp
     stylized/stylizedcaustics.h stylized/stylizedcaustics.cpp

@@ -3,15 +3,13 @@
 #include "util/random.h"
 
 void PhotonMapping::generatePhotonMap(PhotonMap &pmap, const Scene &scene, bool isCaustic) {
-    std::cout << scene.getEmissives().size() << std:: endl;
     for (auto light: scene.getEmissives()) {
         size_t pmapSize = pmap.photons.size();
-        std::cout << "pmap.maxPhotonNum * 0.5 = " << (float)pmap.maxPhotonNum * 0.5 << std::endl;
         while ((pmap.photons.size() - pmapSize) < (float)pmap.maxPhotonNum * 0.5) {
             //std::cerr << pmap.photons.size() << std::flush;
-            if ((pmap.photons.size() - pmapSize) % 100 == 0){
-                std::cout << "pmap.photons.size() - pmapSize = " << (pmap.photons.size() - pmapSize) << std::endl;
-            }
+//            if ((pmap.photons.size() - pmapSize) % 100 == 0){
+//                std::cout << "pmap.photons.size() - pmapSize = " << (pmap.photons.size() - pmapSize) << std::endl;
+//            }
 
             Vector3<Vector3f> vertices = light->getVertices();
             Vector3f lightPos = UniformSampleTriangle(vertices[0], vertices[1], vertices[2]);

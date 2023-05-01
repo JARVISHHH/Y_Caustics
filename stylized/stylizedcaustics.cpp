@@ -46,7 +46,7 @@ void StylizedCaustics::assign(std::vector<Vector2f>& images) {
     std::cout << "m: " << m << " n: " << n << std::endl;
 
     if(m < n) {
-        std::cerr << "Error: n bigger than n!" << std::endl;
+        std::cerr << "Error: n bigger than m!" << std::endl;
         return;
     }
 

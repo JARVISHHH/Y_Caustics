@@ -1,5 +1,6 @@
 #include "pathtracer.h"
 #include "stylized/projection/plane.h"
+#include "tonemapper.h"
 
 #include <iostream>
 
@@ -193,7 +194,10 @@ void PathTracer::toneMap(QRgb *imageData, std::vector<Vector3f> &intensityValues
 //            maxColor[0] = std::max(maxColor[0], intensityValues[offset][0]);
 //            maxColor[1] = std::max(maxColor[1], intensityValues[offset][1]);
 //            maxColor[2] = std::max(maxColor[2], intensityValues[offset][2]);
-            imageData[offset] = qRgb(255 * intensityValues[offset][0], 255 * intensityValues[offset][1], 255 * intensityValues[offset][2]);
+//            imageData[offset] = qRgb(255 * intensityValues[offset][0], 255 * intensityValues[offset][1], 255 * intensityValues[offset][2]);
+            Vector3f rgb_f = 255.f * ToneMapper::gammaCorrect(ToneMapper::reinhard_simple(intensityValues[offset]), 0.5);
+//            Vector3f rgb_f = 255.f * gammaCorrect(aces_approx(intensityValues[offset]), 0.58);
+            imageData[offset] = qRgb(rgb_f(0), rgb_f(1), rgb_f(2));
         }
     }
 //    std::cout<<maxColor[0]<<" "<<maxColor[1]<<" "<<maxColor[2]<<std::endl;
