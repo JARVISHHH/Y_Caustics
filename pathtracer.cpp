@@ -43,7 +43,7 @@ PathTracer::PathTracer(Scene *scene,
             // Sample images
             auto imageSamples = stylizedCaustics.sample(caustic_img);
             // Set plane
-            plane = Plane(0, Eigen::Vector3f(0.05, 0, 3), Eigen::Vector3f(0, 1, 0));
+            plane = Plane(0, Eigen::Vector3f(-0.6, -0.6, -0.03), Eigen::Vector3f(0, 1, 0));
             // Projection
             auto& photons = pmap_caustic.photons;
             // (1) calculate average origin

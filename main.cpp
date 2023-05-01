@@ -2,6 +2,8 @@
 #include <QCommandLineParser>
 
 #include <iostream>
+#include <fstream>
+#include <sstream>
 
 #include "pathtracer.h"
 #include "scene/scene.h"
@@ -12,6 +14,35 @@
 #include "util/CS123Common.h"
 
 #include "stylized/projection/plane.h"
+
+std::map<std::string, std::string> parse_ini_file(const std::string& file_path) {
+    std::ifstream file(file_path);
+    std::map<std::string, std::string> ini_data;
+    std::string line, key, value;
+
+    if (file.is_open()) {
+        while (std::getline(file, line)) {
+            if (line.empty() || line[0] == ';' || line[0] == '#') {
+                continue;
+            }
+
+            std::stringstream ss(line);
+            std::getline(ss, key, '=');
+            std::getline(ss, value);
+
+            if (!key.empty() && !value.empty()) {
+                std::vector<std::string> values;
+                ini_data[key] = value;
+            }
+        }
+        file.close();
+    } else {
+        std::cerr << "Unable to open file: " << file_path << std::endl;
+    }
+
+    return ini_data;
+}
+
 
 int main(int argc, char *argv[])
 {
