@@ -26,6 +26,16 @@ std::string trim(const std::string& str) {
     return (back <= front ? std::string() : std::string(front, back));
 }
 
+std::vector<std::string> split(const std::string& str, char delimiter) {
+    std::vector<std::string> tokens;
+    std::string token;
+    std::stringstream ss(str);
+    while (std::getline(ss, token, delimiter)) {
+        tokens.push_back(token);
+    }
+    return tokens;
+}
+
 std::map<std::string, std::string> parse_ini_file(const std::string& file_path) {
     std::ifstream file(file_path);
     std::map<std::string, std::string> ini_data;
@@ -88,6 +98,13 @@ int main(int argc, char *argv[])
     QString output = QString::fromStdString(ini_data["output"]);
     QString target_img = QString::fromStdString(ini_data["target_img"]);
     QString timeStepString = QString::fromStdString(ini_data["t"]);
+    auto img_center_strs = split(ini_data["img_center"], ',');
+    if (img_center_strs.size() != 3){
+        std::cerr << "img_center incorrect " << std::endl;
+        a.exit(1);
+        return 1;
+    }
+    Eigen::Vector3f img_center(std::stof(img_center_strs[0]), std::stof(img_center_strs[1]), std::stof(img_center_strs[2]));
 
     bool usePhotonMapping = true;
     int samplePerPixel = 1;
@@ -102,31 +119,10 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    PathTracer tracer(scene, IMAGE_WIDTH, IMAGE_HEIGHT, target_img.toStdString(),
+    PathTracer tracer(scene, IMAGE_WIDTH, IMAGE_HEIGHT,
+                      target_img.toStdString(), img_center,
                       usePhotonMapping, samplePerPixel,
                       defocusBlurOn, useOrenNayerBRDF, importanceSampling);
-
-//    if(args.size() == 3) {
-//        QImage image(IMAGE_WIDTH, IMAGE_HEIGHT, QImage::Format_RGB32);
-
-//        QRgb *data = reinterpret_cast<QRgb *>(image.bits());
-
-//        tracer.traceScene(data, *scene);
-
-//        std::string path = output + ".png";
-
-//        bool success = image.save(QString::fromStdString(path));
-//        if(!success) {
-//            success = image.save(QString::fromUtf8(output.c_str()), "PNG");
-//        }
-//        if(success) {
-//            std::cout << "Wrote rendered image to " << output << std::endl;
-//        } else {
-//            std::cerr << "Error: failed to write image to " << output << std::endl;
-//        }
-//        delete scene;
-//    }
-//    else if(args.size() == 4) {
     float timeStep = timeStepString.toFloat();
     for(int i = 0; i <= 1; i++) {
         QImage image(IMAGE_WIDTH, IMAGE_HEIGHT, QImage::Format_RGB32);

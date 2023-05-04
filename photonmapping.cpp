@@ -3,7 +3,7 @@
 #include "util/random.h"
 
 void PhotonMapping::generatePhotonMap(PhotonMap &pmap, const Scene &scene, bool isCaustic) {
-    std::cout << scene.getEmissives().size() << std::endl;
+//    std::cout << scene.getEmissives().size() << std::endl;
     for (auto light: scene.getEmissives()) {
         size_t pmapSize = pmap.photons.size();
         while ((pmap.photons.size() - pmapSize) < (float)pmap.maxPhotonNum * 0.5) {
