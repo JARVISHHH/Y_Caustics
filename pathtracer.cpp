@@ -39,11 +39,11 @@ PathTracer::PathTracer(Scene *scene,
     if (m_usePhotonMapping) {
         generatePhotons(*scene);
         if(doStylizedCaustics) {
-            stylizedCaustics = StylizedCaustics(3, 6);
+            stylizedCaustics = StylizedCaustics(1, 2);
             // Sample images
             auto imageSamples = stylizedCaustics.sample(caustic_img);
             // Set plane
-            plane = Plane(0, Eigen::Vector3f(-0.6, -0.6, -0.03), Eigen::Vector3f(0, 1, 0));
+            plane = Plane(0, Eigen::Vector3f(0, 0, 0), Eigen::Vector3f(0, 1, 0));
             // Projection
             auto& photons = pmap_caustic.photons;
             // (1) calculate average origin
@@ -108,8 +108,9 @@ void PathTracer::traceScene(QRgb *imageData, const Scene& scene, float t)
 {
     if(doStylizedCaustics) {
 //        const auto& originalPhotons = stylizedCaustics.getPhotons();
-        auto& photons = pmap_caustic.photons;
+//        auto& photons = pmap_caustic.photons;
         auto currentPos = stylizedCaustics.move(t);
+        std::cout << "finished move" << std::endl;
         // Back projection
         stylizedCaustics.backProject(scene, pmap_caustic, plane, currentPos);
         std::cout << "Finish stylized caustics" << std::endl;
@@ -121,7 +122,7 @@ void PathTracer::traceScene(QRgb *imageData, const Scene& scene, float t)
     std::cout << "start trace" << std::endl;
     #pragma omp parallel for
     for(int y = 0; y < m_height; ++y) {
-        std::cerr << "\rScanlines remaining: " << m_height - y << ' ' << std::flush;
+//        std::cerr << "\rScanlines remaining: " << m_height - y << ' ' << std::flush;
         #pragma omp parallel for
         for(int x = 0; x < m_width; ++x) {
             int offset = x + (y * m_width);

@@ -8,9 +8,9 @@ void PhotonMapping::generatePhotonMap(PhotonMap &pmap, const Scene &scene, bool 
         size_t pmapSize = pmap.photons.size();
         while ((pmap.photons.size() - pmapSize) < (float)pmap.maxPhotonNum * 0.5) {
 //            std::cerr << pmap.photons.size() << std::flush;
-            if ((pmap.photons.size() - pmapSize) == 0){
-                std::cout << "pmap.photons.size() - pmapSize = " << (pmap.photons.size() - pmapSize) << std::endl;
-            }
+//            if ((pmap.photons.size() - pmapSize) == 0){
+//                std::cout << "pmap.photons.size() - pmapSize = " << (pmap.photons.size() - pmapSize) << std::endl;
+//            }
 
             Vector3<Vector3f> vertices = light->getVertices();
             Vector3f lightPos = UniformSampleTriangle(vertices[0], vertices[1], vertices[2]);

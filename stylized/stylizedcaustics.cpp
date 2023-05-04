@@ -37,6 +37,7 @@ void StylizedCaustics::project(const Scene& scene, const std::vector<Photon> pho
 //        std::cout << "Original pos: " << photons[i].origin[0] << " " << photons[i].origin[1] << " " << photons[i].origin[2] << std::endl;
 //        std::cout << "Back pos: " << backPro[0] << " " << backPro[1] << " " << backPro[2] << std::endl;
     }
+    std::cout << "source number: " << sources.size() << std::endl;
 }
 
 void StylizedCaustics::assign(std::vector<Vector2f>& images) {
@@ -223,7 +224,7 @@ void StylizedCaustics::backProject(const Scene& scene, PhotonMap& pmap_caustic, 
         photon.origin = hitPoint;
         photon.origin = photon.origin;
         photon.dir = (hitPoint - photon.lastHit).normalized();
-        cout << i << flush;
+//        cout << i << flush;
     }
     pmap_caustic.update();
     cout << "finished back projection" << endl;

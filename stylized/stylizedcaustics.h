@@ -66,7 +66,7 @@ private:
     // Results position after tps
     std::vector<Eigen::Vector2f> tpsPos;
 
-    std::vector<int> photonsMap;
+    std::vector<int> photonsMap;  // photonsMap[i] = j -> sources[i] is photons[j]
 };
 
 #endif // STYLIZEDCAUSTICS_H

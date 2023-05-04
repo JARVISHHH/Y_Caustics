@@ -36,8 +36,10 @@ Eigen::Vector2f Plane::projectPoint(const Eigen::Vector3f& pointOrigin, const Ei
 
     // Get the intersection with the plane in 3D space
     auto d = point3D - pointOrigin;
+    if(d.dot(normal3D) > 0) return {100, 100};
     assert(d.dot(normal3D) != 0);
     auto t = (center3D - pointOrigin).dot(normal3D) / d.dot(normal3D);
+    if(t < 0) return {100, 100};
     assert(t >= 0);
 
     auto point = pointOrigin + t * d;
@@ -107,21 +109,17 @@ Eigen::Vector3f Plane::backProjectPoint(const Scene& scene, const Eigen::Vector3
     Ray ray(pointOrigin, (point3D - pointOrigin).normalized());
     // Find the new intersection
     bool intersect = scene.getIntersection(ray, &i);
-    const Triangle *t = static_cast<const Triangle *>(i.data);//Get the triangle in the mesh that was intersected
-    const tinyobj::material_t& mat = t->getMaterial();//Get the material of the triangle from the mesh
-    std::shared_ptr<Material> obj = std::make_shared<Lambertian>(mat);
 
-    selectMaterial(mat, obj);
-
-    while(intersect && obj->getType() != MAT_TYPE_LAMBERTIAN) {
-        Ray nextRay(i.hit + ray.d * 0.000001, ray.d);
-        intersect = scene.getIntersection(nextRay, &i);
-
+    while(intersect) {
         const Triangle *t = static_cast<const Triangle *>(i.data);//Get the triangle in the mesh that was intersected
         const tinyobj::material_t& mat = t->getMaterial();//Get the material of the triangle from the mesh
-        obj = std::make_shared<Lambertian>(mat);
-
+        std::shared_ptr<Material> obj = std::make_shared<Lambertian>(mat);
         selectMaterial(mat, obj);
+        if(obj->getType() != MAT_TYPE_LAMBERTIAN) {
+            Ray nextRay(i.hit + ray.d * 0.000001, ray.d);
+            intersect = scene.getIntersection(nextRay, &i);
+        }
+        else break;
     }
 
     if(!intersect) return {-100, -100, -100};
