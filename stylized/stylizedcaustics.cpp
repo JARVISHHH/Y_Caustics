@@ -188,16 +188,20 @@ std::vector<Eigen::Vector2f> StylizedCaustics::move(float t) {
 //        res[i] = t * (finalResults[i] - sources[i]) + sources[i];
         // final results
 
-        //Assume we move point A to point B
-//        Eigen::Vector2f A = sources[i];
-//        Eigen::Vector2f B = targets[assignmentMap[i]];
-//        Eigen::Vector2f mid ((A[0] + B[0])/2 , (A[1] + B[1])/2);
+        //Assume we have point A. We use tps to move it to B. And then we use refinement to move it to C
+        //t is the time point we want to solve t \in [0,1]
+//        Eigen::Vector2f A;
+//        Eigen::Vector2f B;
+//        Eigen::Vector2f C;
 
-//        std::vector<double> X = {(double)A[0], (double)mid[0], (double)B[0]};
-//        std::vector<double> Y = {(double)A[1], (double)mid[1], (double)B[1]};
-//        tk::spline spline(X,Y);
-//        double target_x = A[0] + t*(A[0] - B[0]);
-//        double target_y = spline(target_x);
+//        std::vector<double> X = {(double)A[0], (double)B[0], (double)C[0]};
+//        std::vector<double> Y = {(double)A[1], (double)B[1], (double)C[1]};
+//        std::vector<double> T = {0, 0.5, 1};
+
+//        tk::spline spline(X,T);
+//        double target_x = spline(t);
+//        tk::spline spline(Y,T);
+//        double target_y = spline(t);
 
 //        Eigen::Vector2f result((float)target_x, (float)target_y);
 
