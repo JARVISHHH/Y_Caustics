@@ -182,6 +182,7 @@ void StylizedCaustics::refine(vector<Vector2f> positions){
 
 std::vector<Eigen::Vector2f> StylizedCaustics::move(float t) {
     std::vector<Eigen::Vector2f> res(sources.size());
+    #pragma omp parallel for
     for(int i = 0; i < sources.size(); i++) {
         // results after tps
 //        res[i] = t * (finalResults[i] - sources[i]) + sources[i];
@@ -218,8 +219,10 @@ void StylizedCaustics::backProject(const Scene& scene, PhotonMap& pmap_caustic, 
         photon.origin = hitPoint;
         photon.origin = photon.origin;
         photon.dir = (hitPoint - photon.lastHit).normalized();
+        cout << i << flush;
     }
     pmap_caustic.update();
+    cout << "finished back projection" << endl;
 }
 
 void StylizedCaustics::calculateAverageOrigin(const std::vector<Photon>& photons) {

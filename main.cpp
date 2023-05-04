@@ -15,6 +15,17 @@
 
 #include "stylized/projection/plane.h"
 
+std::string trim(const std::string& str) {
+    auto front = std::find_if_not(str.begin(), str.end(), [](int ch) {
+        return std::isspace(ch);
+    });
+    auto back = std::find_if_not(str.rbegin(), str.rend(), [](int ch) {
+        return std::isspace(ch);
+    }).base();
+
+    return (back <= front ? std::string() : std::string(front, back));
+}
+
 std::map<std::string, std::string> parse_ini_file(const std::string& file_path) {
     std::ifstream file(file_path);
     std::map<std::string, std::string> ini_data;
@@ -29,9 +40,10 @@ std::map<std::string, std::string> parse_ini_file(const std::string& file_path) 
             std::stringstream ss(line);
             std::getline(ss, key, '=');
             std::getline(ss, value);
+            key = trim(key);
+            value = trim(value);
 
             if (!key.empty() && !value.empty()) {
-                std::vector<std::string> values;
                 ini_data[key] = value;
             }
         }
@@ -52,22 +64,30 @@ int main(int argc, char *argv[])
 
     QCommandLineParser parser;
     parser.addHelpOption();
-    parser.addPositionalArgument("scene", "Scene file to be rendered");
-    parser.addPositionalArgument("output", "Image file to write the rendered image to");
-    parser.addPositionalArgument("time step", "Time step of the animation");
+    parser.addPositionalArgument("ini", "path to the .ini file");
+
+//    parser.addPositionalArgument("scene", "Scene file to be rendered");
+//    parser.addPositionalArgument("output", "Image file to write the rendered image to");
+//    parser.addPositionalArgument("time step", "Time step of the animation");
     parser.process(a);
 
     const QStringList args = parser.positionalArguments();
-    if(args.size() != 3 && args.size() != 4) {
-        std::cerr << "Error: Wrong number of arguments" << std::endl;
-        a.exit(1);
-        return 1;
-    }
-    QString scenefile = args[0];
-    QString output = args[1];
-    QString caustic_img = args[2];
-    QString timeStepString = "-1";
-    if(args.size() == 4) timeStepString = args[3];
+//    if(args.size() != 3 && args.size() != 4) {
+//        std::cerr << "Error: Wrong number of arguments" << std::endl;
+//        a.exit(1);
+//        return 1;
+//    }
+//    QString scenefile = args[0];
+//    QString output = args[1];
+//    QString caustic_img = args[2];
+//    QString timeStepString = "-1";
+//    if(args.size() == 4) timeStepString = args[3];
+    QString ini_path = args[0];
+    std::map<std::string, std::string> ini_data = parse_ini_file(ini_path.toStdString());
+    QString scenefile = QString::fromStdString(ini_data["scenefile"]);
+    QString output = QString::fromStdString(ini_data["output"]);
+    QString target_img = QString::fromStdString(ini_data["target_img"]);
+    QString timeStepString = QString::fromStdString(ini_data["t"]);
 
     bool usePhotonMapping = true;
     int samplePerPixel = 1;
@@ -82,40 +102,61 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    PathTracer tracer(scene, IMAGE_WIDTH, IMAGE_HEIGHT, caustic_img.toStdString(),
+    PathTracer tracer(scene, IMAGE_WIDTH, IMAGE_HEIGHT, target_img.toStdString(),
                       usePhotonMapping, samplePerPixel,
                       defocusBlurOn, useOrenNayerBRDF, importanceSampling);
 
-    if(args.size() == 3) {
+//    if(args.size() == 3) {
+//        QImage image(IMAGE_WIDTH, IMAGE_HEIGHT, QImage::Format_RGB32);
+
+//        QRgb *data = reinterpret_cast<QRgb *>(image.bits());
+
+//        tracer.traceScene(data, *scene);
+
+//        std::string path = output + ".png";
+
+//        bool success = image.save(QString::fromStdString(path));
+//        if(!success) {
+//            success = image.save(QString::fromUtf8(output.c_str()), "PNG");
+//        }
+//        if(success) {
+//            std::cout << "Wrote rendered image to " << output << std::endl;
+//        } else {
+//            std::cerr << "Error: failed to write image to " << output << std::endl;
+//        }
+//        delete scene;
+//    }
+//    else if(args.size() == 4) {
+    float timeStep = timeStepString.toFloat();
+    for(int i = 0; i <= 1; i++) {
         QImage image(IMAGE_WIDTH, IMAGE_HEIGHT, QImage::Format_RGB32);
 
         QRgb *data = reinterpret_cast<QRgb *>(image.bits());
 
-        tracer.traceScene(data, *scene);
+        tracer.traceScene(data, *scene, i);
 
-        std::string path = output.toStdString() + ".png";
+        std::string path = output.toStdString() + "-t" + std::to_string(i) + ".png";
 
         bool success = image.save(QString::fromStdString(path));
         if(!success) {
             success = image.save(output, "PNG");
         }
         if(success) {
-            std::cout << "Wrote rendered image to " << output.toStdString() << std::endl;
+            std::cout << "Wrote rendered image to " << path << std::endl;
         } else {
-            std::cerr << "Error: failed to write image to " << output.toStdString() << std::endl;
+            std::cerr << "Error: failed to write image to " << path << std::endl;
         }
-        delete scene;
     }
-    else if(args.size() == 4) {
-        float timeStep = timeStepString.toFloat();
-        for(int i = 0; i <= 1; i++) {
+    if(timeStep > 0 && timeStep < 1) {
+        float currentTime = timeStep;
+        while(currentTime < 1) {
             QImage image(IMAGE_WIDTH, IMAGE_HEIGHT, QImage::Format_RGB32);
 
             QRgb *data = reinterpret_cast<QRgb *>(image.bits());
 
-            tracer.traceScene(data, *scene, i);
+            tracer.traceScene(data, *scene, currentTime);
 
-            std::string path = output.toStdString() + "-t" + std::to_string(i) + ".png";
+            std::string path = output.toStdString() + "-t" + std::to_string(currentTime) + ".png";
 
             bool success = image.save(QString::fromStdString(path));
             if(!success) {
@@ -126,35 +167,14 @@ int main(int argc, char *argv[])
             } else {
                 std::cerr << "Error: failed to write image to " << path << std::endl;
             }
+
+            currentTime += timeStep;
         }
-        if(timeStep > 0 && timeStep < 1) {
-            float currentTime = timeStep;
-            while(currentTime < 1) {
-                QImage image(IMAGE_WIDTH, IMAGE_HEIGHT, QImage::Format_RGB32);
-
-                QRgb *data = reinterpret_cast<QRgb *>(image.bits());
-
-                tracer.traceScene(data, *scene, currentTime);
-
-                std::string path = output.toStdString() + "-t" + std::to_string(currentTime) + ".png";
-
-                bool success = image.save(QString::fromStdString(path));
-                if(!success) {
-                    success = image.save(output, "PNG");
-                }
-                if(success) {
-                    std::cout << "Wrote rendered image to " << path << std::endl;
-                } else {
-                    std::cerr << "Error: failed to write image to " << path << std::endl;
-                }
-
-                currentTime += timeStep;
-            }
-        }
-        else {
-            std::cerr << "Error: wrong time step" << std::endl;
-        }
-        delete scene;
     }
+    else {
+        std::cerr << "Error: wrong time step" << std::endl;
+    }
+    delete scene;
+//    }
     a.exit();
 }
