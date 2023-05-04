@@ -223,7 +223,7 @@ void StylizedCaustics::backProject(const Scene& scene, PhotonMap& pmap_caustic, 
         photon.origin = hitPoint;
         photon.origin = photon.origin;
         photon.dir = (hitPoint - photon.lastHit).normalized();
-        cout << i << flush;
+//        cout << i << flush;
     }
     pmap_caustic.update();
     cout << "finished back projection" << endl;

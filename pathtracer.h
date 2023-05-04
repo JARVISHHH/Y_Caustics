@@ -16,7 +16,7 @@
 class PathTracer
 {
 public:
-    PathTracer(Scene *scene, int width, int height, std::string caustic_img, bool usePhotonMapping, int samplePerPixel, bool defocusBlurOn, bool useOrenNayerBRDF, bool importanceSampling);
+    PathTracer(Scene *scene, int width, int height, std::string caustic_img, Eigen::Vector3f img_center,bool usePhotonMapping, int samplePerPixel, bool defocusBlurOn, bool useOrenNayerBRDF, bool importanceSampling);
 
     void traceScene(QRgb *imageData, const Scene &scene, float t = 0);
 
