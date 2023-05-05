@@ -143,7 +143,7 @@ int main(int argc, char *argv[])
 
             QRgb *data = reinterpret_cast<QRgb *>(image.bits());
 
-            tracer.traceScene(data, *scene, photonmap_max_dist, photonmap_max_num, photonmap_max_dist, currentTime);
+            tracer.traceScene(data, *scene, photonmap_max_dist, photonmap_max_num, photonmap_min_num, currentTime);
 
             std::string path = output.toStdString() + "-t" + std::to_string(currentTime) + ".png";
 
