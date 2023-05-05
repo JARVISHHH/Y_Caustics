@@ -45,7 +45,7 @@ Vector3f Integrator::debugPhotonMap(const Ray& r, const Scene& scene) {
     return Vector3f(0.0, 0.0, 0.0);
 }
 
-Vector3f Integrator::traceRayWithPhotonMapping(const Ray& r, const Scene& scene, int depth, bool countEmitted) {
+Vector3f Integrator::traceRayWithPhotonMapping(const Ray& r, const Scene& scene, int depth, bool countEmitted, float max_dist, int max_num, int min_num) {
     IntersectionInfo i;
     Ray ray(r);
     if(scene.getIntersection(ray, &i)) {
@@ -89,12 +89,12 @@ Vector3f Integrator::traceRayWithPhotonMapping(const Ray& r, const Scene& scene,
         if (obj->getType() == MAT_TYPE_LAMBERTIAN) {
             Vector3f pos = {i.hit[0], i.hit[1], i.hit[2]};
             Vector3f normal = {n[0], n[1], n[2]};
-            sampleColor += pmap_caustic.getGaussianIrradiance(pos, normal, 0.03, 30, 10);
+            sampleColor += pmap_caustic.getGaussianIrradiance(pos, normal, max_dist, max_num, min_num);
 //            sampleColor += pmap.getGaussianIrradiance(pos, normal, 0.02, 20, 5);
         } else {
             Ray nextRay(ray);
             obj->getScatteredRay(ray, i, nextRay);
-            Vector3f nextRadiance = this->traceRayWithPhotonMapping(nextRay, scene, depth + 1, obj->m_isSpecular);
+            Vector3f nextRadiance = this->traceRayWithPhotonMapping(nextRay, scene, depth + 1, obj->m_isSpecular, max_dist, max_num, min_num);
             sampleColor += (obj->getColor() * factor, nextRadiance);
         }
 

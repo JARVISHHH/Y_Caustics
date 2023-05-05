@@ -19,7 +19,7 @@ private:
 public:
     Integrator(bool importanceSampling, bool useOrenNayerBRDF): m_importanceSampling(importanceSampling), m_useOrenNayerBRDF(useOrenNayerBRDF) {};
     Vector3f debugPhotonMap(const Ray& r, const Scene& scene);
-    Vector3f traceRayWithPhotonMapping(const Ray& r, const Scene& scene, int depth, bool countEmitted);
+    Vector3f traceRayWithPhotonMapping(const Ray& r, const Scene& scene, int depth, bool countEmitted, float max_dist, int max_num, int min_num);
     Vector3f traceRayWithPathTracing(const Ray& r, const Scene& scene, int depth, bool countEmitted);
     void setPmap(const PhotonMap &newPmap);
     void setPmapCaustic(const PhotonMap &newPmap_caustic);

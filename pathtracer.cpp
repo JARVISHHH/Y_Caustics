@@ -105,7 +105,7 @@ PathTracer::PathTracer(Scene *scene,
     }
 }
 
-void PathTracer::traceScene(QRgb *imageData, const Scene& scene, float t)
+void PathTracer::traceScene(QRgb *imageData, const Scene& scene,float max_dist, int max_num, int min_num, float t)
 {
     if(doStylizedCaustics) {
 //        const auto& originalPhotons = stylizedCaustics.getPhotons();
@@ -127,7 +127,7 @@ void PathTracer::traceScene(QRgb *imageData, const Scene& scene, float t)
         #pragma omp parallel for
         for(int x = 0; x < m_width; ++x) {
             int offset = x + (y * m_width);
-            intensityValues[offset] = tracePixel(x, y, scene, invViewMat);
+            intensityValues[offset] = tracePixel(x, y, scene, invViewMat, max_dist, max_num, min_num);
         }
     }
 
@@ -151,7 +151,7 @@ void PathTracer::setIntegrator() {
     m_integrator.setPmapCaustic(pmap_caustic);
 }
 
-Vector3f PathTracer::tracePixel(int x, int y, const Scene& scene, const Matrix4f &invViewMatrix)
+Vector3f PathTracer::tracePixel(int x, int y, const Scene& scene, const Matrix4f &invViewMatrix, float max_dist, int max_num, int min_num)
 {
     Vector3f pixelColor(0.0, 0.0, 0.0);
 
@@ -177,7 +177,7 @@ Vector3f PathTracer::tracePixel(int x, int y, const Scene& scene, const Matrix4f
         }
 
         r = r.transform(invViewMatrix);
-        Vector3f color = m_integrator.traceRayWithPhotonMapping(r, scene, 0, true);// traceRayWithPathTracing(r, scene, 0, true) * 2.5;
+        Vector3f color = m_integrator.traceRayWithPhotonMapping(r, scene, 0, true, max_dist, max_num, min_num);// traceRayWithPathTracing(r, scene, 0, true) * 2.5;
         pixelColor += Vector3f(color[0] / (1 + color[0]), color[1] / (1 + color[1]), color[2] / (1 + color[2]));
     }
 //    pixelColor = Vector3f(

@@ -82,16 +82,6 @@ int main(int argc, char *argv[])
     parser.process(a);
 
     const QStringList args = parser.positionalArguments();
-//    if(args.size() != 3 && args.size() != 4) {
-//        std::cerr << "Error: Wrong number of arguments" << std::endl;
-//        a.exit(1);
-//        return 1;
-//    }
-//    QString scenefile = args[0];
-//    QString output = args[1];
-//    QString caustic_img = args[2];
-//    QString timeStepString = "-1";
-//    if(args.size() == 4) timeStepString = args[3];
     QString ini_path = args[0];
     std::map<std::string, std::string> ini_data = parse_ini_file(ini_path.toStdString());
     QString scenefile = QString::fromStdString(ini_data["scenefile"]);
@@ -105,6 +95,9 @@ int main(int argc, char *argv[])
         return 1;
     }
     Eigen::Vector3f img_center(std::stof(img_center_strs[0]), std::stof(img_center_strs[1]), std::stof(img_center_strs[2]));
+    float photonmap_max_dist = std::stof(ini_data["photonmap_max_dist"]);
+    int photonmap_max_num = std::stoi(ini_data["photonmap_max_num"]);
+    int photonmap_min_num = std::stoi(ini_data["photonmap_min_num"]);
 
     bool usePhotonMapping = true;
     int samplePerPixel = 1;
@@ -129,7 +122,7 @@ int main(int argc, char *argv[])
 
         QRgb *data = reinterpret_cast<QRgb *>(image.bits());
 
-        tracer.traceScene(data, *scene, i);
+        tracer.traceScene(data, *scene, photonmap_max_dist, photonmap_max_num, photonmap_min_num, i);
 
         std::string path = output.toStdString() + "-t" + std::to_string(i) + ".png";
 
@@ -150,7 +143,7 @@ int main(int argc, char *argv[])
 
             QRgb *data = reinterpret_cast<QRgb *>(image.bits());
 
-            tracer.traceScene(data, *scene, currentTime);
+            tracer.traceScene(data, *scene, photonmap_max_dist, photonmap_max_num, photonmap_max_dist, currentTime);
 
             std::string path = output.toStdString() + "-t" + std::to_string(currentTime) + ".png";
 
