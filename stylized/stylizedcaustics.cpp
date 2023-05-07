@@ -202,12 +202,12 @@ std::vector<Eigen::Vector2f> StylizedCaustics::move(float t) {
 
         Eigen::Vector2f splineResult;
         {
-            tk::spline spline(X,T);
+            tk::spline spline(T,X);
             double target_x = spline(1);
             splineResult[0] = target_x;
         }
         {
-            tk::spline spline(Y,T);
+            tk::spline spline(T,Y);
             double target_y = spline(1);
             splineResult[1] = target_y;
         }
