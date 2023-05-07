@@ -29,7 +29,7 @@ Vector3f Integrator::debugPhotonMap(const Ray& r, const Scene& scene) {
     Ray ray(r);
     if(scene.getIntersection(ray, &i)) {
         Vector3f pos = {i.hit[0], i.hit[1], i.hit[2]};
-        //pmap_r.visualizePhotonMap(pos, 0.008, 10);
+        return pmap.visualizePhotonMap(pos, 0.01, 10);
         const Triangle *t = static_cast<const Triangle *>(i.data);//Get the triangle in the mesh that was intersected
         const tinyobj::material_t& mat = t->getMaterial();//Get the material of the triangle from the mesh
         std::shared_ptr<Material> obj = std::make_shared<Lambertian>(mat);
@@ -69,7 +69,7 @@ Vector3f Integrator::traceRayWithPhotonMapping(const Ray& r, const Scene& scene,
         for (auto light: scene.getEmissives()) {
             Vector3f lightColor = sampler.sampleDirect(ray, i, light, scene, scatteredLight);
             Vector3f objColor = obj->sampleBRDF(ray.d, n, scatteredLight.d) * obj->getDiffuseColor();
-            sampleColor += 3.0 * piecewiseMul(lightColor, objColor);
+            sampleColor += 2.0 * piecewiseMul(lightColor, objColor);
         }
         // Self-emitting radiance
         if (countEmitted) {
@@ -89,8 +89,8 @@ Vector3f Integrator::traceRayWithPhotonMapping(const Ray& r, const Scene& scene,
         if (obj->getType() == MAT_TYPE_LAMBERTIAN) {
             Vector3f pos = {i.hit[0], i.hit[1], i.hit[2]};
             Vector3f normal = {n[0], n[1], n[2]};
-            sampleColor += pmap_caustic.getGaussianIrradiance(pos, normal, max_dist, max_num, min_num);
-//            sampleColor += pmap.getGaussianIrradiance(pos, normal, 0.02, 20, 5);
+            sampleColor += pmap_caustic.getGaussianIrradianceWithFixedNum(pos, normal, 30, 10);
+            sampleColor += pmap.getGaussianIrradiance(pos, normal, 0.01, 30, 3);
         } else {
             Ray nextRay(ray);
             obj->getScatteredRay(ray, i, nextRay);
