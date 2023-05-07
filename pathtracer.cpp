@@ -20,8 +20,6 @@ const double albedo = 0.75;
 PathTracer::PathTracer(Scene *scene,
                        int width,
                        int height,
-                       std::string caustic_img,
-                       Eigen::Vector3f img_center,
                        bool usePhotonMapping,
                        int samplePerPixel,
                        bool defocusBlurOn,
@@ -40,11 +38,12 @@ PathTracer::PathTracer(Scene *scene,
     if (m_usePhotonMapping) {
         generatePhotons(*scene);
         if(doStylizedCaustics) {
-            stylizedCaustics = StylizedCaustics(1, 2);
+            auto imageParameter = scene->getImageParameters()[0];
+            stylizedCaustics = StylizedCaustics(imageParameter->img_size[0], imageParameter->img_size[1]);
             // Sample images
-            auto imageSamples = stylizedCaustics.sample(caustic_img);
+            auto imageSamples = stylizedCaustics.sample(imageParameter->caustic_img);
             // Set plane
-            plane = Plane(0, img_center, Eigen::Vector3f(0, 1, 0));
+            plane = Plane(imageParameter->img_rotate, imageParameter->img_center, imageParameter->img_normal);
             // Projection
             auto& photons = pmap_caustic.photons;
             // (1) calculate average origin
@@ -89,7 +88,7 @@ PathTracer::PathTracer(Scene *scene,
                 Eigen::Vector3d result = m_tps.interpolate(tempt);
                 B[i] = Eigen::Vector2f(result[0], result[1]);
             }
-            stylizedCaustics.setFinalResults(B);
+            stylizedCaustics.setTpsResults(B);
             std::cout << "Finished interpolation " << std::endl;
 
             //For Yutang
@@ -100,7 +99,7 @@ PathTracer::PathTracer(Scene *scene,
             // Note from Yingtong: Guess refinement is better to be a member function of class StylizedCaustics, since all data is stored in StylizedCaustics.
             // or make the stylizedCaustics a parameter of the function
             // To show the final result, go to move() function in stylizedcaustics.cpp, uncomment the final results code, and comment the results after tps
-            stylizedCaustics.refine(stylizedCaustics.finalResults);
+            stylizedCaustics.refine(stylizedCaustics.tpsResults);
         }
     }
 }

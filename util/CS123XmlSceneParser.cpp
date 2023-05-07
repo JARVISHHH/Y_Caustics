@@ -67,6 +67,7 @@ CS123XmlSceneParser::~CS123XmlSceneParser()
     m_nodes.clear();
     m_lights.clear();
     m_objects.clear();
+    imageParameters.clear();
 }
 
 bool CS123XmlSceneParser::getGlobalData(CS123SceneGlobalData& data) const {
@@ -89,6 +90,11 @@ bool CS123XmlSceneParser::getLightData(int i, CS123SceneLightData& data) const {
         return false;
     }
     data = *m_lights[i];
+    return true;
+}
+
+bool CS123XmlSceneParser::getImageParameters(std::vector<std::shared_ptr<ImageParameter>>& imageParameters) const {
+    imageParameters = this->imageParameters;
     return true;
 }
 
@@ -154,7 +160,11 @@ bool CS123XmlSceneParser::parse() {
         } else if (e.tagName() == "object") {
             if (!parseObjectData(e))
                 return false;
-        } else if (!e.isNull()) {
+        } else if (e.tagName() == "stylized") {
+            if(!parseStylized(e))
+                return false;
+        }
+        else if (!e.isNull()) {
             UNSUPPORTED_ELEMENT(e);
             return false;
         }
@@ -184,6 +194,20 @@ template <typename T> bool parseSingle(const QDomElement &single, T &a, const QS
     if (!single.hasAttribute(str))
         return false;
     a = single.attribute(str).toDouble();
+    return true;
+}
+
+template <typename T> bool parseDouble(
+        const QDomElement &doubleElement,
+        T &a,
+        T &b,
+        const QString &str_a,
+        const QString &str_b) {
+    if (!doubleElement.hasAttribute(str_a) ||
+        !doubleElement.hasAttribute(str_b))
+        return false;
+    a = doubleElement.attribute(str_a).toDouble();
+    b = doubleElement.attribute(str_b).toDouble();
     return true;
 }
 
@@ -795,6 +819,68 @@ bool CS123XmlSceneParser::parsePrimitive(const QDomElement &prim, CS123SceneNode
         }
         childNode = childNode.nextSibling();
     }
+
+    return true;
+}
+
+bool CS123XmlSceneParser::parseStylized(const QDomElement &stylized) {
+    // Iterate over child elements
+    QDomNode childNode = stylized.firstChild();
+    while (!childNode.isNull()) {
+        QDomElement e = childNode.toElement();
+        if (e.tagName() == "parameters") {
+            if (!parseParameters(e)) {
+                PARSE_ERROR(e);
+                return false;
+            }
+        } else if (!e.isNull()) {
+            UNSUPPORTED_ELEMENT(e);
+            return false;
+        }
+        childNode = childNode.nextSibling();
+    }
+
+    return true;
+}
+
+bool CS123XmlSceneParser::parseParameters(const QDomElement &params){
+    auto imageParameter = std::make_shared<ImageParameter>();
+    // Iterate over child elements
+    QDomNode childNode = params.firstChild();
+    while (!childNode.isNull()) {
+        QDomElement e = childNode.toElement();
+        if(e.tagName() == "image") {
+            if(!e.hasAttribute("filename")) {
+                PARSE_ERROR(e);
+                return false;
+            }
+            imageParameter->caustic_img = e.attribute("filename").toStdString();
+        }
+        else if (e.tagName() == "size") {
+            if (!parseDouble(e, imageParameter->img_size(0), imageParameter->img_size(1), "x", "y")) {
+                PARSE_ERROR(e);
+                return false;
+            }
+        }
+        else if (e.tagName() == "center") {
+            if (!parseTriple(e, imageParameter->img_center(0), imageParameter->img_center(1), imageParameter->img_center(2), "x", "y", "z")) {
+                PARSE_ERROR(e);
+                return false;
+            }
+        }
+        else if (e.tagName() == "normal") {
+            if (!parseTriple(e, imageParameter->img_normal(0), imageParameter->img_normal(1), imageParameter->img_normal(2), "x", "y", "z")) {
+                PARSE_ERROR(e);
+                return false;
+            }
+        }
+        else if (!e.isNull()) {
+            UNSUPPORTED_ELEMENT(e);
+            return false;
+        }
+        childNode = childNode.nextSibling();
+    }
+    imageParameters.push_back(imageParameter);
 
     return true;
 }

@@ -12,11 +12,12 @@
 #include "stylized/projection/plane.h"
 #include "stylized/stylizedcaustics.h"
 #include "integrator.h"
+#include "util/CS123XmlSceneParser.h"
 
 class PathTracer
 {
 public:
-    PathTracer(Scene *scene, int width, int height, std::string caustic_img, Eigen::Vector3f img_center,bool usePhotonMapping, int samplePerPixel, bool defocusBlurOn, bool useOrenNayerBRDF, bool importanceSampling);
+    PathTracer(Scene *scene, int width, int height, bool usePhotonMapping, int samplePerPixel, bool defocusBlurOn, bool useOrenNayerBRDF, bool importanceSampling);
 
     void traceScene(QRgb *imageData, const Scene &scene, float max_dist, int max_num, int min_num, float t = 0);
 

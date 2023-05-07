@@ -9,6 +9,14 @@
 
 #include <QtXml>
 
+struct ImageParameter {
+    std::string caustic_img;
+    Eigen::Vector2f img_size;
+    float img_rotate;
+    Eigen::Vector3f img_center;
+    Eigen::Vector3f img_normal;
+};
+
 /**
  * @class CS123XmlSceneParser
  *
@@ -41,6 +49,8 @@ public:
     // Returns the ith light data
     virtual bool getLightData(int i, CS123SceneLightData& data) const;
 
+    virtual bool getImageParameters(std::vector<std::shared_ptr<ImageParameter>>& imageParameters) const;
+
 
 private:
     // The filename should be contained within this parser implementation.
@@ -51,6 +61,8 @@ private:
     bool parseObjectData(const QDomElement &object);
     bool parseTransBlock(const QDomElement &transblock, CS123SceneNode* node);
     bool parsePrimitive(const QDomElement &prim, CS123SceneNode* node);
+    bool parseStylized(const QDomElement &stylized);
+    bool parseParameters(const QDomElement &params);
 
     std::string file_name;
     mutable std::map<std::string, CS123SceneNode*> m_objects;
@@ -58,6 +70,7 @@ private:
     std::vector<CS123SceneLightData*> m_lights;
     CS123SceneGlobalData m_globalData;
     std::vector<CS123SceneNode*> m_nodes;
+    std::vector<std::shared_ptr<ImageParameter>> imageParameters;
 
     int cnt = -1;
 };

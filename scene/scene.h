@@ -10,6 +10,7 @@
 #include "util/CS123SceneData.h"
 
 #include "shape/mesh.h"
+#include "util/CS123XmlSceneParser.h"
 
 #include <memory>
 
@@ -29,9 +30,11 @@ public:
 
     void setCamera(const BasicCamera& camera);
     void setGlobalData(const CS123SceneGlobalData& data);
+    void setImageParameters(const std::vector<std::shared_ptr<ImageParameter>>& imageParameters);
     void addLight(const CS123SceneLightData& data);
 
     const std::vector<CS123SceneLightData>& getLights() const;
+    const std::vector<std::shared_ptr<ImageParameter>>& getImageParameters() const;
 
     bool getIntersection(const Ray& ray, IntersectionInfo* I) const;
 
@@ -49,6 +52,7 @@ private:
     std::vector<Triangle*> m_emissives;
 
     std::vector<CS123SceneLightData> m_lights;
+    std::vector<std::shared_ptr<ImageParameter>> m_image_parameters;
 
     static bool parseTree(CS123SceneNode *root, Scene *scene, const std::string& baseDir);
     static void parseNode(CS123SceneNode *node, const Eigen::Affine3f &parentTransform, std::vector<Object *> *objects, const std::string& baseDir);

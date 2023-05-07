@@ -17,10 +17,16 @@ std::vector<Eigen::Vector2f> ImageSampler::sample(std::string path) {
 
     for(int i = 0; i < image.height(); i++) {
         for(int j = 0; j < image.width(); j++) {
-            if(image.pixel(j, i) != 0xffffffff)
-                res.push_back({(float)j / image.width() * width - width / 2.0f, (float)i / image.height() * height - height / 2.0f});
+            int gray = 255 - qGray(image.pixel(j, i));
+            if(gray == 0) continue;
+            float x = (float)j / image.width() * width - width / 2.0f;
+            float y = (float)i / image.height() * height - height / 2.0f;
+            std::vector<Eigen::Vector2f> samples(gray / 32, {x, y});
+            res.insert(res.end(), samples.begin(), samples.end());
         }
     }
+
+    std::cout << "sample size: " << res.size() << std::endl;
 
     return res;
 }
