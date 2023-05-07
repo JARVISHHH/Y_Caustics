@@ -1,8 +1,8 @@
 <scenefile>
 	<cameradata>
-		<pos x="0" y="3" z="8"/>
-		<up x="0" y="1" z="0"/>
-		<focus x="0" y="0" z="0"/>
+		<pos x="0" y="8" z="2"/>
+		<up x="0" y="0" z="-1"/>
+		<focus x="0" y="0" z="2"/>
 		<heightangle v="45"/>
 	</cameradata>
 
@@ -17,9 +17,9 @@
 
 	<stylized>
 		<parameters>
-			<image filename ="example-scenes/images/cloud.png"/>
-			<size x="3" y="6"/>
-			<center x="0" y="0" z="2"/>
+			<image filename ="example-scenes/images/learn.jpg"/>
+			<size x="3" y="3.5"/>
+			<center x="0" y="0" z="3"/>
 			<normal x="0" y="1" z="0"/>
 		</parameters>
 	</stylized>

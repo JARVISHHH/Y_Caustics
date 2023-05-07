@@ -92,7 +92,7 @@ int main(int argc, char *argv[])
     int photonmap_min_num = std::stoi(ini_data["photonmap_min_num"]);
 
     bool usePhotonMapping = true;
-    int samplePerPixel = 1;
+    int samplePerPixel = 100;
     bool defocusBlurOn = false;
     bool useOrenNayerBRDF = false;
     bool importanceSampling = false;
