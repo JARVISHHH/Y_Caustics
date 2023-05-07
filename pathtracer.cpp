@@ -13,8 +13,8 @@
 
 using namespace Eigen;
 
-bool doStylizedCaustics = true;
-bool useGreedyMethod = true;
+bool doStylizedCaustics = false;
+bool useGreedyMethod = false;
 
 extern int maxPhotonsNum;
 
@@ -137,6 +137,7 @@ void PathTracer::traceScene(QRgb *imageData, const Scene& scene,float max_dist, 
 
 void PathTracer::generatePhotons(const Scene& scene) {
     std::cout << "start generate" << std::endl;
+    pmap_r.maxPhotonNum = 500000;
     photonmapper.generatePhotonMap(pmap_r, scene);
     std::cout << "finish first generate" << std::endl;
     pmap_r.balance();
@@ -145,6 +146,7 @@ void PathTracer::generatePhotons(const Scene& scene) {
     photonmapper.generatePhotonMap(pmap_caustic, scene, true);
     pmap_caustic.balance();
     std::cout<<"finish generating caustic photon map, size: "<<pmap_caustic.photons.size()<<std::endl;
+    setIntegrator();
 }
 
 void PathTracer::setIntegrator() {
