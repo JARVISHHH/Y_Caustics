@@ -66,6 +66,10 @@ bool Scene::load(QString filename, Scene **scenePointer)
         return false;
     }
 
+    std::vector<std::shared_ptr<ImageParameter>> imageParameters;
+    parser.getImageParameters(imageParameters);
+    scene->setImageParameters(imageParameters);
+
     *scenePointer = scene;
     return true;
 }
@@ -298,6 +302,10 @@ void Scene::setGlobalData(const CS123SceneGlobalData& data)
     m_globalData = data;
 }
 
+void Scene::setImageParameters(const std::vector<std::shared_ptr<ImageParameter>>& imageParameters) {
+    m_image_parameters = imageParameters;
+}
+
 void Scene::addLight(const CS123SceneLightData &data)
 {
     m_lights.push_back(data);
@@ -306,6 +314,11 @@ void Scene::addLight(const CS123SceneLightData &data)
 const std::vector<CS123SceneLightData> &Scene::getLights() const
 {
     return m_lights;
+}
+
+const std::vector<std::shared_ptr<ImageParameter>> &Scene::getImageParameters() const
+{
+    return m_image_parameters;
 }
 
 bool Scene::getIntersection(const Ray& ray, IntersectionInfo* I) const{

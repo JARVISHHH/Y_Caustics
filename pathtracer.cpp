@@ -20,7 +20,6 @@ const double albedo = 0.75;
 PathTracer::PathTracer(Scene *scene,
                        int width,
                        int height,
-                       ImageParameters imageParameters,
                        bool usePhotonMapping,
                        int samplePerPixel,
                        bool defocusBlurOn,
@@ -39,11 +38,12 @@ PathTracer::PathTracer(Scene *scene,
     if (m_usePhotonMapping) {
         generatePhotons(*scene);
         if(doStylizedCaustics) {
-            stylizedCaustics = StylizedCaustics(imageParameters.img_size[0], imageParameters.img_size[1]);
+            auto imageParameter = scene->getImageParameters()[0];
+            stylizedCaustics = StylizedCaustics(imageParameter->img_size[0], imageParameter->img_size[1]);
             // Sample images
-            auto imageSamples = stylizedCaustics.sample(imageParameters.caustic_img);
+            auto imageSamples = stylizedCaustics.sample(imageParameter->caustic_img);
             // Set plane
-            plane = Plane(imageParameters.img_rotate, imageParameters.img_center, imageParameters.img_normal);
+            plane = Plane(imageParameter->img_rotate, imageParameter->img_center, imageParameter->img_normal);
             // Projection
             auto& photons = pmap_caustic.photons;
             // (1) calculate average origin
