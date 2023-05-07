@@ -5,6 +5,8 @@
 #include <cmath>
 #include <iostream>
 
+extern float intensityDivisor;
+
 static double gaussianFilter(double dist, double maxDist) {
     return 0.918 * (1.0 - (1.0 - std::exp(-1.953 * dist * dist / (2 * maxDist * maxDist))) / ( 1.0 - std::exp(-1.953)));
 }
@@ -213,7 +215,7 @@ Eigen::Vector3f PhotonMap::getFixedRadiusIrradiance(Eigen::Vector3f origin, Eige
     res *= (1.0 / (M_PI * max_dist * max_dist)) * (1.0 / M_PI) / size / 100.0;
     return res;
 }
-// max_dist 越大越模糊, max_num 越大越亮，min_num越小越模糊
+// max_dist 越大越模糊, max_num 越大越亮，min_num 越小越模糊
 Eigen::Vector3f PhotonMap::getGaussianIrradiance(Eigen::Vector3f origin, Eigen::Vector3f normal, float max_dist, int max_num, int min_num)
 {
     Eigen::Vector3f res(0.0, 0.0, 0.0);
@@ -232,7 +234,7 @@ Eigen::Vector3f PhotonMap::getGaussianIrradiance(Eigen::Vector3f origin, Eigen::
         local_map.nearest_photons.pop();
     }
 
-    res *= (1.0 / (M_PI * max_dist * max_dist)) * (1.0 / M_PI) / 100.0;
+    res *= (1.0 / (M_PI * max_dist * max_dist)) * (1.0 / M_PI) / intensityDivisor;
     return res;
 }
 

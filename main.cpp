@@ -10,10 +10,10 @@
 
 #include <QImage>
 
-#include "stylized/stylizedcaustics.h"
 #include "util/CS123Common.h"
 
-#include "stylized/projection/plane.h"
+int maxPhotonsNum = 50000;
+float intensityDivisor = 1;
 
 std::string trim(const std::string& str) {
     auto front = std::find_if_not(str.begin(), str.end(), [](int ch) {
@@ -87,12 +87,15 @@ int main(int argc, char *argv[])
     QString output = QString::fromStdString(ini_data["output"]);
 
     QString timeStepString = QString::fromStdString(ini_data["t"]);
+
+    maxPhotonsNum = std::stoi(ini_data["photonmap_photon_num"]);
     float photonmap_max_dist = std::stof(ini_data["photonmap_max_dist"]);
     int photonmap_max_num = std::stoi(ini_data["photonmap_max_num"]);
     int photonmap_min_num = std::stoi(ini_data["photonmap_min_num"]);
+    intensityDivisor = std::stof(ini_data["photonmap_intensity_divisor"]);
 
     bool usePhotonMapping = true;
-    int samplePerPixel = 100;
+    int samplePerPixel = std::stoi(ini_data["sample_per_pixel"]);
     bool defocusBlurOn = false;
     bool useOrenNayerBRDF = false;
     bool importanceSampling = false;
