@@ -16,6 +16,8 @@ using namespace Eigen;
 bool doStylizedCaustics = true;
 bool useGreedyMethod = true;
 
+extern int maxPhotonsNum;
+
 const double albedo = 0.75;
 PathTracer::PathTracer(Scene *scene,
                        int width,
@@ -139,7 +141,7 @@ void PathTracer::generatePhotons(const Scene& scene) {
     std::cout << "finish first generate" << std::endl;
     pmap_r.balance();
     std::cout<<"finish generating photon map, size: "<<pmap_r.photons.size()<<std::endl;
-    pmap_caustic.maxPhotonNum = 50000;
+    pmap_caustic.maxPhotonNum = maxPhotonsNum;
     photonmapper.generatePhotonMap(pmap_caustic, scene, true);
     pmap_caustic.balance();
     std::cout<<"finish generating caustic photon map, size: "<<pmap_caustic.photons.size()<<std::endl;

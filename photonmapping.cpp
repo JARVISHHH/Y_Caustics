@@ -93,7 +93,7 @@ void PhotonMapping::tracePhoton(PhotonMap &pmap, const Ray &r, const Scene &scen
                 p.lastHit = ray.o;
                 p.power = Vector3f(factor[0] * lightColor[0] * (1.0f / (1 - maxRefl)),
                                    factor[1] * lightColor[1] * (1.0f / (1 - maxRefl)),
-                                   factor[2] * lightColor[2] * (1.0f / (1 - maxRefl)));
+                                   factor[2] * lightColor[2] * (1.0f / (1 - maxRefl))) / pmap.maxPhotonNum;
                 p.origin = Vector3f(newOrigin[0], newOrigin[1], newOrigin[2]);
                 p.dir = Vector3f(ray.d[0], ray.d[1], ray.d[2]);
                 pmap.store(p);
@@ -134,7 +134,7 @@ void PhotonMapping::tracePhotonCaustic(PhotonMap &pmap, const Ray &r, const Scen
                 p.lastHit = ray.o;
                 p.power = Vector3f(factor[0] * lightColor[0] * (1.0f / (1 - maxRefl)),
                                    factor[1] * lightColor[1] * (1.0f / (1 - maxRefl)),
-                                   factor[2] * lightColor[2] * (1.0f / (1 - maxRefl)));
+                                   factor[2] * lightColor[2] * (1.0f / (1 - maxRefl))) / pmap.maxPhotonNum;
                 p.origin = Vector3f(newOrigin[0], newOrigin[1], newOrigin[2]);
                 p.dir = Vector3f(ray.d[0], ray.d[1], ray.d[2]);
                 pmap.store(p);
