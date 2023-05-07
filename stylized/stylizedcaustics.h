@@ -31,13 +31,13 @@ public:
     std::vector<Eigen::Vector2f> getSources() {return sources;}
     std::vector<Eigen::Vector2f> getTargets() {return targets;}
 
-    std::vector<Eigen::Vector2f> finalResults;
-    void setFinalResults(std::vector<Eigen::Vector2f>& B) {
-        finalResults.resize(m);
+    std::vector<Eigen::Vector2f> tpsResults;
+    void setTpsResults(std::vector<Eigen::Vector2f>& B) {
+        tpsResults.resize(m);
         for(int i = 0; i < m; i++)
         {
-            if(sourcesIndexInSubset.find(i) != sourcesIndexInSubset.end()) finalResults[i] = targets[assignmentMap[i]];
-            else finalResults[i] = B[i];
+            if(sourcesIndexInSubset.find(i) != sourcesIndexInSubset.end()) tpsResults[i] = targets[assignmentMap[i]];
+            else tpsResults[i] = B[i];
         }
     }
 

@@ -183,6 +183,7 @@ void StylizedCaustics::refine(vector<Vector2f> positions){
 
 std::vector<Eigen::Vector2f> StylizedCaustics::move(float t) {
     std::vector<Eigen::Vector2f> res(sources.size());
+    float linearWeight = 0.5;
     #pragma omp parallel for
     for(int i = 0; i < sources.size(); i++) {
         // results after tps
@@ -191,20 +192,29 @@ std::vector<Eigen::Vector2f> StylizedCaustics::move(float t) {
 
         //Assume we have point A. We use tps to move it to B. And then we use refinement to move it to C
         //t is the time point we want to solve t \in [0,1]
-//        Eigen::Vector2f A;
-//        Eigen::Vector2f B;
-//        Eigen::Vector2f C;
+        Eigen::Vector2f A = sources[i];
+        Eigen::Vector2f B = tpsResults[i];
+        Eigen::Vector2f C = targets[assignmentMap[i]];
 
-//        std::vector<double> X = {(double)A[0], (double)B[0], (double)C[0]};
-//        std::vector<double> Y = {(double)A[1], (double)B[1], (double)C[1]};
-//        std::vector<double> T = {0, 0.5, 1};
+        std::vector<double> X = {(double)A[0], (double)B[0], (double)C[0]};
+        std::vector<double> Y = {(double)A[1], (double)B[1], (double)C[1]};
+        std::vector<double> T = {0, 0.5, 1};
 
-//        tk::spline spline(X,T);
-//        double target_x = spline(t);
-//        tk::spline spline(Y,T);
-//        double target_y = spline(t);
+        Eigen::Vector2f splineResult;
+        {
+            tk::spline spline(X,T);
+            double target_x = spline(t);
+            splineResult[0] = target_x;
+        }
+        {
+            tk::spline spline(Y,T);
+            double target_y = spline(t);
+            splineResult[1] = target_y;
+        }
 
-//        Eigen::Vector2f result((float)target_x, (float)target_y);
+        Eigen::Vector2f linearResult = t * (targets[assignmentMap[i]] - sources[i]) + sources[i];
+
+//        res[i] = (1 - linearWeight) * splineResult + linearWeight * linearResult;
 
         res[i] = t * (targets[assignmentMap[i]] - sources[i]) + sources[i];
     }

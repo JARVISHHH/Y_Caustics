@@ -65,6 +65,26 @@ std::map<std::string, std::string> parse_ini_file(const std::string& file_path) 
     return ini_data;
 }
 
+bool parseVector2(std::string data, Eigen::Vector2f& res) {
+    auto res_strs = split(data, ',');
+    if (res_strs.size() != 2){
+        std::cerr << "img_center incorrect " << std::endl;
+        return false;
+    }
+    res = Eigen::Vector2f(std::stof(res_strs[0]), std::stof(res_strs[1]));
+    return true;
+}
+
+bool parseVector3(std::string data, Eigen::Vector3f& res) {
+    auto res_strs = split(data, ',');
+    if (res_strs.size() != 3){
+        std::cerr << "img_center incorrect " << std::endl;
+        return false;
+    }
+    res = Eigen::Vector3f(std::stof(res_strs[0]), std::stof(res_strs[1]), std::stof(res_strs[2]));
+    return true;
+}
+
 
 int main(int argc, char *argv[])
 {
@@ -86,15 +106,25 @@ int main(int argc, char *argv[])
     std::map<std::string, std::string> ini_data = parse_ini_file(ini_path.toStdString());
     QString scenefile = QString::fromStdString(ini_data["scenefile"]);
     QString output = QString::fromStdString(ini_data["output"]);
+
+    ImageParameters imageParameters;
     QString target_img = QString::fromStdString(ini_data["target_img"]);
-    QString timeStepString = QString::fromStdString(ini_data["t"]);
-    auto img_center_strs = split(ini_data["img_center"], ',');
-    if (img_center_strs.size() != 3){
-        std::cerr << "img_center incorrect " << std::endl;
+    imageParameters.caustic_img = target_img.toStdString();
+    if(!parseVector2(ini_data["img_size"], imageParameters.img_size)) {
         a.exit(1);
         return 1;
     }
-    Eigen::Vector3f img_center(std::stof(img_center_strs[0]), std::stof(img_center_strs[1]), std::stof(img_center_strs[2]));
+    if(!parseVector3(ini_data["img_center"], imageParameters.img_center)) {
+        a.exit(1);
+        return 1;
+    }
+    if(!parseVector3(ini_data["img_normal"], imageParameters.img_normal)) {
+        a.exit(1);
+        return 1;
+    }
+
+
+    QString timeStepString = QString::fromStdString(ini_data["t"]);
     float photonmap_max_dist = std::stof(ini_data["photonmap_max_dist"]);
     int photonmap_max_num = std::stoi(ini_data["photonmap_max_num"]);
     int photonmap_min_num = std::stoi(ini_data["photonmap_min_num"]);
@@ -113,7 +143,7 @@ int main(int argc, char *argv[])
     }
 
     PathTracer tracer(scene, IMAGE_WIDTH, IMAGE_HEIGHT,
-                      target_img.toStdString(), img_center,
+                      imageParameters,
                       usePhotonMapping, samplePerPixel,
                       defocusBlurOn, useOrenNayerBRDF, importanceSampling);
     float timeStep = timeStepString.toFloat();
@@ -124,7 +154,7 @@ int main(int argc, char *argv[])
 
         tracer.traceScene(data, *scene, photonmap_max_dist, photonmap_max_num, photonmap_min_num, i);
 
-        std::string path = output.toStdString() + "-t" + std::to_string(i) + ".png";
+        std::string path = output.toStdString() + "-t" + std::to_string(float(i)) + ".png";
 
         bool success = image.save(QString::fromStdString(path));
         if(!success) {

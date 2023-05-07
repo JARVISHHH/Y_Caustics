@@ -13,10 +13,18 @@
 #include "stylized/stylizedcaustics.h"
 #include "integrator.h"
 
+struct ImageParameters {
+    std::string caustic_img;
+    Eigen::Vector2f img_size;
+    float img_rotate;
+    Eigen::Vector3f img_center;
+    Eigen::Vector3f img_normal;
+};
+
 class PathTracer
 {
 public:
-    PathTracer(Scene *scene, int width, int height, std::string caustic_img, Eigen::Vector3f img_center,bool usePhotonMapping, int samplePerPixel, bool defocusBlurOn, bool useOrenNayerBRDF, bool importanceSampling);
+    PathTracer(Scene *scene, int width, int height, ImageParameters imageParameters, bool usePhotonMapping, int samplePerPixel, bool defocusBlurOn, bool useOrenNayerBRDF, bool importanceSampling);
 
     void traceScene(QRgb *imageData, const Scene &scene, float max_dist, int max_num, int min_num, float t = 0);
 
