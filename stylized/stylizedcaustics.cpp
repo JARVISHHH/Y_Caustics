@@ -160,9 +160,9 @@ void StylizedCaustics::refine(vector<Vector2f> positions){
         photons_dist d = *distMaxHeapSet.begin();
         Photon b = d.p1;
         auto i = d.p2;
-//        assignmentMap[I[i]] = B[b];
+        assignmentMap[I[i]] = B[b];
 //        std::cout << B[b] << std::endl;
-        assignmentMap[B[b]] = I[i]; //store in assignment map
+//        assignmentMap[B[b]] = I[i]; //store in assignment map
 
         B_PhotonMap.remove(b);
         I.erase(I.find(i));
@@ -173,7 +173,6 @@ void StylizedCaustics::refine(vector<Vector2f> positions){
         // for all the objects in distMaxHeap, replace the b if b is deleted
         for(auto it = distMaxHeapSet.begin(); it != distMaxHeapSet.end();) {
             if (it->p1.origin == b.origin) {
-//                Photon new_b = b;
                 Photon new_b = B_PhotonMap.getNearestPhotonFrom(it->p2->origin);
                 float new_distance = (Vector2f(new_b.origin(0), new_b.origin(2)) - Vector2f(it->p2->origin(0), it->p2->origin(2))).norm();
                 photons_dist updated_element{new_b, it->p2, new_distance * new_distance};
@@ -185,6 +184,12 @@ void StylizedCaustics::refine(vector<Vector2f> positions){
         }
         for(auto& updated_element: tempVector) distMaxHeapSet.insert(updated_element);
     }
+//    unordered_set<int> s;
+//    for (int i = 0; i < assignmentMap.size(); i++){
+//        s.insert(assignmentMap[i]);
+//        cout << i << " ->" << assignmentMap[i] << endl;
+//    }
+//    cout << "set.size=" << s.size() << ", map.size="<< assignmentMap.size() << endl;
     cout << "finished iteration" << endl;
 }
 

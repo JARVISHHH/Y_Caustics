@@ -44,15 +44,20 @@ void nearest_photons_map::get_nearest_photon(const vector<Photon>& photons, int 
     {
         double dist_axis = origin[cur_photon.divide_axis] - cur_photon.origin[cur_photon.divide_axis];
         if (dist_axis < 0)
-            get_nearest_photons(photons, 2 * index + 1);
-        else
-            get_nearest_photons(photons, 2 * index + 2);
+            get_nearest_photon(photons, 2 * index + 1);
+        else if (2 * index + 2 < photons.size())
+            get_nearest_photon(photons, 2 * index + 2);
     }
+    //std::cout << "origin = " << origin(0) << ", " << origin(1) << ", " << origin(2) << std::endl;
+//    std::cout << "cur_photon.origin = " << cur_photon.origin(0) << ", " << cur_photon.origin(1) << ", " << cur_photon.origin(2) << std::endl;
 
     float cur_dist_square = (cur_photon.origin - origin).squaredNorm();
+//    std::cout << "cur_dist_square = " << cur_dist_square << std::endl;
     if (cur_dist_square < min_dist_square)
     {
+//        std::cout << "min_dist_square = " << min_dist_square << std::endl;
         min_dist_square = cur_dist_square;
+//        std::cout << "min_dist_square = " << min_dist_square << std::endl;
         nearest_photon = cur_photon;
     }
 }
