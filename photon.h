@@ -10,26 +10,41 @@ using namespace std;
 struct Photon {
     Eigen::Vector3f lastHit;
     Eigen::Vector3f origin;        // photon position
+
+    int index = 0;
+
     Eigen::Vector3f power;      // photon power (uncompressed)
     int divide_axis;        // splitting plane for kd-tree
     Eigen::Vector3f dir;    // incoming direction
 
     Photon(){;}
 
-    Photon(Eigen::Vector3f lastHit, Eigen::Vector3f origin, Eigen::Vector3f power = Eigen::Vector3f::Zero(), int divide_axis = 0, Eigen::Vector3f dir = Eigen::Vector3f::Zero()) {
+    Photon(Eigen::Vector3f lastHit, Eigen::Vector3f origin, int index = 0, Eigen::Vector3f power = Eigen::Vector3f::Zero(), int divide_axis = 0, Eigen::Vector3f dir = Eigen::Vector3f::Zero()) {
         this->lastHit = lastHit;
         this->origin = origin;
+        this->index = index;
         this->power = power;
         this->divide_axis = divide_axis;
         this->dir = dir;
+    }
+
+    Photon(Photon const &a) {
+        this->lastHit = a.lastHit;
+        this->origin = a.origin;
+        this->index = a.index;
+        this->power = a.power;
+        this->divide_axis = a.divide_axis;
+        this->dir = a.dir;
     }
 };
 
 struct photon_hash{
     size_t operator()(const Photon& p) const {
         // Combine the hashes of individual attributes using XOR and bit shifting
-        std::hash<float> float_hash;
-        return float_hash(p.origin.x()) ^ (float_hash(p.origin.y()) << 1) ^ (float_hash(p.origin.z()) << 2);
+//        std::hash<float> float_hash;
+        std::hash<int> int_hash;
+        return int_hash((int)p.index);
+//        return float_hash(p.origin.x()) ^ (float_hash(p.origin.y()) << 1) ^ (float_hash(p.origin.z()) << 2);
      }
 };
 
@@ -69,7 +84,7 @@ public:
 
 inline bool operator==(const Photon& a, const Photon& b)
 {
-    return a.origin == b.origin;
+    return a.index == b.index;
 }
 
 class PhotonMap

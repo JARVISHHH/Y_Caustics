@@ -174,25 +174,36 @@ void PhotonMap::remove(Photon p){
     int low = 0, high = static_cast<int>(photons.size()) - 1;
     int index = -1;
 
-    while (low <= high){
-        int mid = low + (high - low) / 2;
-
-        if (photons[mid] == p){
-            index = mid;
+    for(int i = 0; i < photons.size(); i++) {
+        if(photons[i] == p) {
+//            std::cout << i << std::endl;
+            photons.erase(photons.begin() + i);
+            update();
             break;
         }
-
-        if (photons[mid].origin[photons[mid].divide_axis] < p.origin[p.divide_axis]){
-            low = mid + 1;
-        } else {
-            high = mid - 1;
-        }
     }
 
-    if (index != -1){
-        photons.erase(photons.begin() + index);
+//    while (low <= high){
+//        int mid = low + (high - low) / 2;
+
+//        if (photons[mid] == p){
+//            index = mid;
+//            break;
+//        }
+
+//        if (photons[mid].origin[photons[mid].divide_axis] < p.origin[photons[mid].divide_axis]){
+//            low = mid + 1;
+//        } else {
+//            high = mid - 1;
+//        }
+//    }
+
+//    if (index != -1){
+//        photons.erase(photons.begin() + index);
 //        update();
-    }
+//    }
+
+//    std::cout << "index: " << index << std::endl;
 }
 
 

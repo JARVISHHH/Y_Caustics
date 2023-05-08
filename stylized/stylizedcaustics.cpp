@@ -7,6 +7,7 @@
 extern bool useGreedyMethod;
 
 std::random_device rd;
+
 std::mt19937 g;
 using namespace Eigen;
 
@@ -123,7 +124,7 @@ void StylizedCaustics::refine(vector<Vector2f> positions){
     for (const auto& t: targets){
         // convert targets (vector<Vector2f>) to a vector<Photon> (y = 0)
 //        auto t_photon = std::make_shared<Photon>(Vector3f::Zero(), Vector3f(t(0), 0, t(1)), Vector3f::Zero(), 0);
-        Photon t_photon = Photon(Vector3f::Zero(), Vector3f(t(0), 0, t(1)));
+        Photon t_photon = Photon(Vector3f::Zero(), Vector3f(t(0), 0, t(1)), b_index);
 //        B_PhotonMap.store(*t_photon.get());
         B_PhotonMap.store(t_photon);
         B[t_photon] = b_index;
@@ -156,7 +157,7 @@ void StylizedCaustics::refine(vector<Vector2f> positions){
 
     // iteratively choose the max disance from distMaxHeap and store pair
     while (!I.empty()){
-        std::cerr << "\rHeap remaining: "<< I.size() << std::flush;
+        std::cerr << "\rHeap remaining: "<< I.size() << " B_PhotonMap: "<< B_PhotonMap.photons.size() << std::flush;
         photons_dist d = *distMaxHeapSet.begin();
         Photon b = d.p1;
         auto i = d.p2;
@@ -165,6 +166,7 @@ void StylizedCaustics::refine(vector<Vector2f> positions){
 //        assignmentMap[B[b]] = I[i]; //store in assignment map
 
         B_PhotonMap.remove(b);
+//        std::cerr << "\rB_PhotonMap: "<< B_PhotonMap.ph.size() << std::flush;
         I.erase(I.find(i));
 
         // update distMaxHeap: delete the first element w/ i
