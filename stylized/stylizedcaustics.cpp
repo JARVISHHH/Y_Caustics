@@ -117,11 +117,14 @@ void StylizedCaustics::refine(vector<Vector2f> positions){
     // construt a balanced kd tree (PhotonMap) out of target
     // also populate map
     PhotonMap B_PhotonMap = PhotonMap(targets.size());
-    unordered_map<Photon, int, photon_hash> B;
+//    unordered_map<std::shared_ptr<Photon>, int> B;
+    unordered_map<Photon, int, photon_hash> B;  // Photon -> index in photon map
     int b_index = 0;
     for (const auto& t: targets){
         // convert targets (vector<Vector2f>) to a vector<Photon> (y = 0)
+//        auto t_photon = std::make_shared<Photon>(Vector3f::Zero(), Vector3f(t(0), 0, t(1)), Vector3f::Zero(), 0);
         Photon t_photon = Photon{Vector3f::Zero(), Vector3f(t(0), 0, t(1)), Vector3f::Zero(), 0};
+//        B_PhotonMap.store(*t_photon.get());
         B_PhotonMap.store(t_photon);
         B[t_photon] = b_index;
         b_index++;
@@ -131,12 +134,15 @@ void StylizedCaustics::refine(vector<Vector2f> positions){
 
     // construct a max heap containing the position b in B that is closest to each pos in positions
     // also construct a set of Photons for the next loop
-    set<photons_dist, photons_dist_compare> distMaxHeapSet;
-    unordered_map<Photon, int, photon_hash> I; // Photons in positions mapped to their indices
+    multiset<photons_dist, photons_dist_compare> distMaxHeapSet;
+//    set<photons_dist, photons_dist_compare> distMaxHeapSet;
+    unordered_map<std::shared_ptr<Photon>, int> I;
+//    unordered_map<Photon, int, photon_hash> I; // Photons in positions mapped to their indices
     int index = 0;
     for (const auto& pos : positions){
         Vector3f i_vec(pos(0), 0, pos(1));
-        Photon i = Photon{Vector3f::Zero(), i_vec};
+        auto i = std::make_shared<Photon>(Vector3f::Zero(), i_vec);
+//        Photon i = Photon{Vector3f::Zero(), i_vec};
         Photon b = B_PhotonMap.getNearestPhotonFrom(i_vec);
         float distance = (pos - Vector2f(b.origin(0), b.origin(2))).norm();
         photons_dist ppd {b, i, distance * distance};
@@ -146,11 +152,16 @@ void StylizedCaustics::refine(vector<Vector2f> positions){
     }
     cout << "finished dist max heap construction" << endl;
 
+    std::cout << distMaxHeapSet.size() << " " << B_PhotonMap.photons.size() << std::endl;
+
     // iteratively choose the max disance from distMaxHeap and store pair
     while (!I.empty()){
+        std::cerr << "\rHeap remaining: "<< I.size() << std::flush;
         photons_dist d = *distMaxHeapSet.begin();
         Photon b = d.p1;
-        Photon i = d.p2;
+        auto i = d.p2;
+//        assignmentMap[I[i]] = B[b];
+//        std::cout << B[b] << std::endl;
         assignmentMap[B[b]] = I[i]; //store in assignment map
 
         B_PhotonMap.remove(b);
@@ -158,18 +169,21 @@ void StylizedCaustics::refine(vector<Vector2f> positions){
 
         // update distMaxHeap: delete the first element w/ i
         distMaxHeapSet.erase(distMaxHeapSet.begin());
+        std::vector<photons_dist> tempVector;
         // for all the objects in distMaxHeap, replace the b if b is deleted
-        for(auto it = distMaxHeapSet.begin(); it != distMaxHeapSet.end(); ) {
+        for(auto it = distMaxHeapSet.begin(); it != distMaxHeapSet.end();) {
             if (it->p1.origin == b.origin) {
-                Photon new_b = B_PhotonMap.getNearestPhotonFrom(it->p2.origin);
-                float new_distance = (Vector2f(new_b.origin(0), new_b.origin(2)) - Vector2f(it->p2.origin(0), it->p2.origin(2))).norm();
+//                Photon new_b = b;
+                Photon new_b = B_PhotonMap.getNearestPhotonFrom(it->p2->origin);
+                float new_distance = (Vector2f(new_b.origin(0), new_b.origin(2)) - Vector2f(it->p2->origin(0), it->p2->origin(2))).norm();
                 photons_dist updated_element{new_b, it->p2, new_distance * new_distance};
                 it = distMaxHeapSet.erase(it);
-                distMaxHeapSet.insert(updated_element);
+                tempVector.push_back(updated_element);
             } else {
-                ++it;
+                it++;
             }
         }
+        for(auto& updated_element: tempVector) distMaxHeapSet.insert(updated_element);
     }
     cout << "finished iteration" << endl;
 
@@ -198,7 +212,7 @@ std::vector<Eigen::Vector2f> StylizedCaustics::move(float t) {
 
         std::vector<double> X = {(double)A[0], (double)B[0], (double)C[0]};
         std::vector<double> Y = {(double)A[1], (double)B[1], (double)C[1]};
-        std::vector<double> T = {0, 0.5, 1};
+        std::vector<double> T = {0, 0.3, 1};
 
         Eigen::Vector2f splineResult;
         {

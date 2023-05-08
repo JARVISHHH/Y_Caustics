@@ -1,5 +1,6 @@
 #ifndef PHOTON_H
 #define PHOTON_H
+#include <memory>
 #include <vector>
 #include <Eigen>
 
@@ -90,7 +91,7 @@ public:
 struct photons_dist
 {
     Photon p1;
-    Photon p2;
+    std::shared_ptr<Photon> p2;
     float dist_square;
 };
 
@@ -102,12 +103,12 @@ inline bool operator<(photons_dist d1, photons_dist d2)
 struct photons_dist_compare {
     bool operator()(const photons_dist& lhs, const photons_dist& rhs) const {
         if (lhs.dist_square == rhs.dist_square) {
-            if (lhs.p2.origin(0) != rhs.p2.origin(0)) {
-                return lhs.p2.origin(0) < rhs.p2.origin(0);
-            } else if (lhs.p2.origin(1) != rhs.p2.origin(1)) {
-                return lhs.p2.origin(1) < rhs.p2.origin(1);
+            if (lhs.p2->origin(0) != rhs.p2->origin(0)) {
+                return lhs.p2->origin(0) < rhs.p2->origin(0);
+            } else if (lhs.p2->origin(1) != rhs.p2->origin(1)) {
+                return lhs.p2->origin(1) < rhs.p2->origin(1);
             } else {
-                return lhs.p2.origin(2) < rhs.p2.origin(2);
+                return lhs.p2->origin(2) < rhs.p2->origin(2);
             }
         }
         return lhs.dist_square < rhs.dist_square;
