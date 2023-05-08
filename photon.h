@@ -7,13 +7,23 @@
 #include <queue>
 using namespace std;
 
-typedef struct Photon {
+struct Photon {
     Eigen::Vector3f lastHit;
     Eigen::Vector3f origin;        // photon position
     Eigen::Vector3f power;      // photon power (uncompressed)
     int divide_axis;        // splitting plane for kd-tree
     Eigen::Vector3f dir;    // incoming direction
-} Photon;
+
+    Photon(){;}
+
+    Photon(Eigen::Vector3f lastHit, Eigen::Vector3f origin, Eigen::Vector3f power = Eigen::Vector3f::Zero(), int divide_axis = 0, Eigen::Vector3f dir = Eigen::Vector3f::Zero()) {
+        this->lastHit = lastHit;
+        this->origin = origin;
+        this->power = power;
+        this->divide_axis = divide_axis;
+        this->dir = dir;
+    }
+};
 
 struct photon_hash{
     size_t operator()(const Photon& p) const {

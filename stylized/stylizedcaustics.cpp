@@ -123,7 +123,7 @@ void StylizedCaustics::refine(vector<Vector2f> positions){
     for (const auto& t: targets){
         // convert targets (vector<Vector2f>) to a vector<Photon> (y = 0)
 //        auto t_photon = std::make_shared<Photon>(Vector3f::Zero(), Vector3f(t(0), 0, t(1)), Vector3f::Zero(), 0);
-        Photon t_photon = Photon{Vector3f::Zero(), Vector3f(t(0), 0, t(1)), Vector3f::Zero(), 0};
+        Photon t_photon = Photon(Vector3f::Zero(), Vector3f(t(0), 0, t(1)));
 //        B_PhotonMap.store(*t_photon.get());
         B_PhotonMap.store(t_photon);
         B[t_photon] = b_index;
@@ -186,13 +186,6 @@ void StylizedCaustics::refine(vector<Vector2f> positions){
         for(auto& updated_element: tempVector) distMaxHeapSet.insert(updated_element);
     }
     cout << "finished iteration" << endl;
-
-//    // random assignment
-//    for (int i = 0; i < targets.size(); i++){
-//        assignmentMap[i] = i;
-//    }
-
-    //inverse CDF
 }
 
 std::vector<Eigen::Vector2f> StylizedCaustics::move(float t) {
@@ -231,7 +224,7 @@ std::vector<Eigen::Vector2f> StylizedCaustics::move(float t) {
         res[i] = (1 - linearWeight) * splineResult + linearWeight * linearResult;
 
 //        res[i] = splineResult;
-//        res[i] = linearResult;
+        res[i] = linearResult;
     }
     return res;
 }
