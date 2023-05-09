@@ -7,8 +7,7 @@ void PhotonMapping::generatePhotonMap(PhotonMap &pmap, const Scene &scene, bool 
     for (int i = 0; i < scene.getEmissives().size(); ++i) {
         auto light = scene.getEmissives()[i];
         size_t pmapSize = pmap.photons.size();
-        while ((pmap.photons.size() - pmapSize) < (float)pmap.maxPhotonNum * 0.5) {
-//            std::cerr << pmap.photons.size() << std::flush;
+        while ((pmap.photons.size() - pmapSize) < (float)pmap.maxPhotonNum / scene.getEmissives().size()) {
 //            if ((pmap.photons.size() - pmapSize) == 0){
 //                std::cout << "pmap.photons.size() - pmapSize = " << (pmap.photons.size() - pmapSize) << std::endl;
 //            }
