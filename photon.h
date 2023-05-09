@@ -12,6 +12,7 @@ struct Photon {
     Eigen::Vector3f origin;        // photon position
 
     int index = 0;
+    int lightIdx;
 
     Eigen::Vector3f power;      // photon power (uncompressed)
     int divide_axis;        // splitting plane for kd-tree
@@ -19,13 +20,14 @@ struct Photon {
 
     Photon(){;}
 
-    Photon(Eigen::Vector3f lastHit, Eigen::Vector3f origin, int index = 0, Eigen::Vector3f power = Eigen::Vector3f::Zero(), int divide_axis = 0, Eigen::Vector3f dir = Eigen::Vector3f::Zero()) {
+    Photon(Eigen::Vector3f lastHit, Eigen::Vector3f origin, int index = 0, int lightIdx = 0, Eigen::Vector3f power = Eigen::Vector3f::Zero(), int divide_axis = 0, Eigen::Vector3f dir = Eigen::Vector3f::Zero()) {
         this->lastHit = lastHit;
         this->origin = origin;
         this->index = index;
         this->power = power;
         this->divide_axis = divide_axis;
         this->dir = dir;
+        this->lightIdx = lightIdx;
     }
 
     Photon(Photon const &a) {
@@ -35,6 +37,7 @@ struct Photon {
         this->power = a.power;
         this->divide_axis = a.divide_axis;
         this->dir = a.dir;
+        this->lightIdx = lightIdx;
     }
 };
 
