@@ -137,7 +137,7 @@ void PathTracer::traceScene(QRgb *imageData, const Scene& scene,float max_dist, 
 
 void PathTracer::generatePhotons(const Scene& scene) {
     std::cout << "start generate" << std::endl;
-    pmap_r.maxPhotonNum = 500000;
+    pmap_r.maxPhotonNum = 50000;
     photonmapper.generatePhotonMap(pmap_r, scene);
     std::cout << "finish first generate" << std::endl;
     pmap_r.balance();
