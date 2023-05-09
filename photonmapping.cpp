@@ -4,7 +4,8 @@
 
 void PhotonMapping::generatePhotonMap(PhotonMap &pmap, const Scene &scene, bool isCaustic) {
 //    std::cout << scene.getEmissives().size() << std::endl;
-    for (auto light: scene.getEmissives()) {
+    for (int i = 0; i < scene.getEmissives().size(); ++i) {
+        auto light = scene.getEmissives()[i];
         size_t pmapSize = pmap.photons.size();
         while ((pmap.photons.size() - pmapSize) < (float)pmap.maxPhotonNum * 0.5) {
 //            std::cerr << pmap.photons.size() << std::flush;
@@ -21,8 +22,8 @@ void PhotonMapping::generatePhotonMap(PhotonMap &pmap, const Scene &scene, bool 
             Vector3f color = Vector3f(light->getMaterial().emission[0], light->getMaterial().emission[1], light->getMaterial().emission[2]) / light->getMaterial().emission[0];
             double lightPdf = 1.0f / (light->getAera() * d.dot(n));
             Ray scatteredLight = Ray(lightPos + 0.01 * d, d);
-            if (!isCaustic) tracePhoton(pmap, scatteredLight, scene, color / lightPdf, 0);
-            else tracePhotonCaustic(pmap, scatteredLight, scene, color / lightPdf, 0, false);
+            if (!isCaustic) tracePhoton(pmap, scatteredLight, scene, color / lightPdf, 0, i);
+            else tracePhotonCaustic(pmap, scatteredLight, scene, color / lightPdf, 0, false, i);
         }
     }
 }
@@ -69,7 +70,7 @@ void PhotonMapping::selectMaterial(const tinyobj::material_t& mat, std::shared_p
 
 }
 
-void PhotonMapping::tracePhoton(PhotonMap &pmap, const Ray &r, const Scene &scene, Eigen::Vector3f lightColor, int depth) {
+void PhotonMapping::tracePhoton(PhotonMap &pmap, const Ray &r, const Scene &scene, Eigen::Vector3f lightColor, int depth, int lightIdx) {
     if (depth > 5) return;
 
     IntersectionInfo i;
@@ -96,6 +97,7 @@ void PhotonMapping::tracePhoton(PhotonMap &pmap, const Ray &r, const Scene &scen
                                    factor[2] * lightColor[2] * (1.0f / (1 - maxRefl))) / pmap.maxPhotonNum;
                 p.origin = Vector3f(newOrigin[0], newOrigin[1], newOrigin[2]);
                 p.dir = Vector3f(ray.d[0], ray.d[1], ray.d[2]);
+                p.lightIdx = lightIdx;
                 pmap.store(p);
                 return;
             }
@@ -103,12 +105,12 @@ void PhotonMapping::tracePhoton(PhotonMap &pmap, const Ray &r, const Scene &scen
 
         Ray nextRay(ray);
         obj->getScatteredRay(ray, i, nextRay);
-        tracePhoton(pmap, nextRay, scene, piecewiseMul(factor, lightColor) * (1.0f / maxRefl), depth + 1);
+        tracePhoton(pmap, nextRay, scene, piecewiseMul(factor, lightColor) * (1.0f / maxRefl), depth + 1, lightIdx);
     }
 
 }
 
-void PhotonMapping::tracePhotonCaustic(PhotonMap &pmap, const Ray &r, const Scene &scene, Eigen::Vector3f lightColor, int depth, bool flag) {
+void PhotonMapping::tracePhotonCaustic(PhotonMap &pmap, const Ray &r, const Scene &scene, Eigen::Vector3f lightColor, int depth, bool flag, int lightIdx) {
     if (depth > 5) return;
 
     IntersectionInfo i;
@@ -137,6 +139,7 @@ void PhotonMapping::tracePhotonCaustic(PhotonMap &pmap, const Ray &r, const Scen
                                    factor[2] * lightColor[2] * (1.0f / (1 - maxRefl))) / pmap.maxPhotonNum;
                 p.origin = Vector3f(newOrigin[0], newOrigin[1], newOrigin[2]);
                 p.dir = Vector3f(ray.d[0], ray.d[1], ray.d[2]);
+                p.lightIdx = lightIdx;
                 pmap.store(p);
                 return;
             }
@@ -145,7 +148,7 @@ void PhotonMapping::tracePhotonCaustic(PhotonMap &pmap, const Ray &r, const Scen
 
         Ray nextRay(ray);
         obj->getScatteredRay(ray, i, nextRay);
-        tracePhotonCaustic(pmap, nextRay, scene, piecewiseMul(factor, lightColor) * (1.0f / maxRefl), depth + 1, obj->getType() == MAT_TYPE_DIELECTRIC);
+        tracePhotonCaustic(pmap, nextRay, scene, piecewiseMul(factor, lightColor) * (1.0f / maxRefl), depth + 1, obj->getType() == MAT_TYPE_DIELECTRIC, lightIdx);
     }
 
 }

@@ -201,7 +201,7 @@ std::vector<Eigen::Vector2f> StylizedCaustics::move(float t) {
     #pragma omp parallel for
     for(int i = 0; i < sources.size(); i++) {
         // results after tps
-//        res[i] = t * (finalResults[i] - sources[i]) + sources[i];
+//        res[i] = t * (tpsResults[i] - sources[i]) + sources[i];
         // final results
 
         //Assume we have point A. We use tps to move it to B. And then we use refinement to move it to C
@@ -212,7 +212,7 @@ std::vector<Eigen::Vector2f> StylizedCaustics::move(float t) {
 
         std::vector<double> X = {(double)A[0], (double)B[0], (double)C[0]};
         std::vector<double> Y = {(double)A[1], (double)B[1], (double)C[1]};
-        std::vector<double> T = {0, 0.3, 1};
+        std::vector<double> T = {0, 0.5, 1};
 
         Eigen::Vector2f splineResult;
         {
@@ -231,7 +231,7 @@ std::vector<Eigen::Vector2f> StylizedCaustics::move(float t) {
         res[i] = (1 - linearWeight) * splineResult + linearWeight * linearResult;
 
 //        res[i] = splineResult;
-        res[i] = linearResult;
+//        res[i] = linearResult;
     }
     return res;
 }
