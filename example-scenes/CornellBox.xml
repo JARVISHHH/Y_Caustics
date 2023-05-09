@@ -10,9 +10,19 @@
 		<transblock>
 			<translate x="0" y="0" z="0"/>
                         <rotate x="0" y="0" z="1" angle="0"/>
-			<object type="primitive" name="mesh" filename="models/Caustics/cornellbox/wineglass-cornellbox">
+			<object type="primitive" name="mesh" filename="models/Caustics/cornellbox/ball-cornellbox-2">
 			</object>
 		</transblock>
 	</object>
+
+	<stylized>
+		<parameters>
+			<image filename ="example-scenes/images/frog.png"/>
+			<size x="1" y="1"/>
+			<center x="0" y="0" z="3"/>
+			<normal x="0" y="1" z="0"/>
+		</parameters>
+	</stylized>
+
 
 </scenefile>
