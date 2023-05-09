@@ -14,7 +14,7 @@
 using namespace Eigen;
 
 bool doStylizedCaustics = true;
-bool useGreedyMethod = true;
+bool useGreedyMethod = false;
 
 extern int maxPhotonsNum;
 
@@ -101,7 +101,7 @@ PathTracer::PathTracer(Scene *scene,
             // Note from Yingtong: Guess refinement is better to be a member function of class StylizedCaustics, since all data is stored in StylizedCaustics.
             // or make the stylizedCaustics a parameter of the function
             // To show the final result, go to move() function in stylizedcaustics.cpp, uncomment the final results code, and comment the results after tps
-            stylizedCaustics.refine(stylizedCaustics.tpsResults);
+//            stylizedCaustics.refine(stylizedCaustics.tpsResults);
         }
     }
 }
