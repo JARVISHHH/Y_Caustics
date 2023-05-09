@@ -15,6 +15,7 @@ class StylizedCaustics
 public:
     StylizedCaustics();
     StylizedCaustics(float width, float height);
+    StylizedCaustics(std::shared_ptr<ImageParameter> imageParameter);
 
     std::vector<Eigen::Vector2f> sample(std::string path);
     void project(const Scene& scene, const std::vector<Photon> photons, Plane& plane);
@@ -47,6 +48,8 @@ private:
     void greedy();
 
     float width, height;
+
+    std::shared_ptr<ImageParameter> imageParameter;
 
     int m;  // Total number of points
     int n;  // Number of points in subsets

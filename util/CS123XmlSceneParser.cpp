@@ -862,6 +862,13 @@ bool CS123XmlSceneParser::parseParameters(const QDomElement &params){
                 return false;
             }
         }
+        else if(e.tagName() == "rotate") {
+            if(!e.hasAttribute("angle")) {
+                PARSE_ERROR(e);
+                return false;
+            }
+            imageParameter->img_rotate = e.attribute("angle").toFloat() / 180 * M_PI;
+        }
         else if (e.tagName() == "center") {
             if (!parseTriple(e, imageParameter->img_center(0), imageParameter->img_center(1), imageParameter->img_center(2), "x", "y", "z")) {
                 PARSE_ERROR(e);
@@ -870,6 +877,12 @@ bool CS123XmlSceneParser::parseParameters(const QDomElement &params){
         }
         else if (e.tagName() == "normal") {
             if (!parseTriple(e, imageParameter->img_normal(0), imageParameter->img_normal(1), imageParameter->img_normal(2), "x", "y", "z")) {
+                PARSE_ERROR(e);
+                return false;
+            }
+        }
+        else if(e.tagName() == "light") {
+            if (!parseDouble(e, imageParameter->lightIndexBegin, imageParameter->lightIndexEnd, "indexBegin", "indexEnd")) {
                 PARSE_ERROR(e);
                 return false;
             }

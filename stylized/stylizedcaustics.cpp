@@ -21,6 +21,12 @@ StylizedCaustics::StylizedCaustics(float width, float height)
     g = std::mt19937(rd());
 }
 
+StylizedCaustics::StylizedCaustics(std::shared_ptr<ImageParameter> imageParameter)
+    :imageParameter(imageParameter), width(imageParameter->img_size[0]), height(imageParameter->img_size[1])
+{
+    g = std::mt19937(rd());
+}
+
 std::vector<Eigen::Vector2f> StylizedCaustics::sample(std::string path) {
     ImageSampler imageSampler(width, height);
     return imageSampler.sample(path);
@@ -29,14 +35,12 @@ std::vector<Eigen::Vector2f> StylizedCaustics::sample(std::string path) {
 void StylizedCaustics::project(const Scene& scene, const std::vector<Photon> photons, Plane& plane) {
     sources.clear();
     for(int i = 0; i < photons.size(); i++) {
-        auto caustics2D = plane.projectPoint(averageOrigin, photons[i].origin);
-        if(caustics2D.norm() > 100) continue;
-        sources.push_back(caustics2D);
-        photonsMap.push_back(i);
-//        auto backPro = plane.backProjectPoint(scene, averageOrigin, caustics2D);
-//        if(backPro.norm() > 100) backPro = photons[i].origin;
-//        std::cout << "Original pos: " << photons[i].origin[0] << " " << photons[i].origin[1] << " " << photons[i].origin[2] << std::endl;
-//        std::cout << "Back pos: " << backPro[0] << " " << backPro[1] << " " << backPro[2] << std::endl;
+        if(imageParameter->lightIndexEnd < 0 || imageParameter->lightIndexBegin <= photons[i].lightIdx && imageParameter->lightIndexEnd >= photons[i].lightIdx){
+            auto caustics2D = plane.projectPoint(averageOrigin, photons[i].origin);
+            if(caustics2D.norm() > 100) continue;
+            sources.push_back(caustics2D);
+            photonsMap.push_back(i);
+        }
     }
     std::cout << "source number: " << sources.size() << std::endl;
 }
@@ -51,14 +55,6 @@ void StylizedCaustics::assign(std::vector<Vector2f>& images) {
         std::cerr << "Error: n bigger than m!" << std::endl;
         return;
     }
-
-//    Eigen::Vector2f maxPoint(-100, -100), minPoint(100, 100);
-//    for(auto& point: images) {
-//        for(int i = 0; i < 2; i++) {
-//            maxPoint[i] = std::max(maxPoint[i], point[i]);
-//            minPoint[i] = std::min(minPoint[i], point[i]);
-//        }
-//    }
 
     std::mt19937 rng(rd());    // Random-number engine used (Mersenne-Twister in this case)
 
@@ -251,14 +247,19 @@ void StylizedCaustics::backProject(const Scene& scene, PhotonMap& pmap_caustic, 
         photon.dir = (hitPoint - photon.lastHit).normalized();
 //        cout << i << flush;
     }
-    pmap_caustic.update();
     cout << "finished back projection" << endl;
 }
 
 void StylizedCaustics::calculateAverageOrigin(const std::vector<Photon>& photons) {
     averageOrigin = {0, 0, 0};
-    for(const auto& photon: photons) averageOrigin += photon.lastHit;
-    averageOrigin /= photons.size();
+    int size = 0;
+    for(const auto& photon: photons) {
+        if(imageParameter->lightIndexEnd < 0 || imageParameter->lightIndexBegin <= photon.lightIdx && imageParameter->lightIndexEnd >= photon.lightIdx){
+            size++;
+            averageOrigin += photon.lastHit;
+        }
+    }
+    if(size > 0) averageOrigin /= size;
 }
 
 std::vector<Eigen::Vector2f> StylizedCaustics::getSubsetSourcesPos() {

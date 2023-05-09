@@ -37,7 +37,7 @@ struct Photon {
         this->power = a.power;
         this->divide_axis = a.divide_axis;
         this->dir = a.dir;
-        this->lightIdx = lightIdx;
+        this->lightIdx = a.lightIdx;
     }
 };
 

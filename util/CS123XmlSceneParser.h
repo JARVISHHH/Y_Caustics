@@ -12,9 +12,11 @@
 struct ImageParameter {
     std::string caustic_img;
     Eigen::Vector2f img_size;
-    float img_rotate;
+    float img_rotate = 0;
     Eigen::Vector3f img_center;
     Eigen::Vector3f img_normal;
+
+    int lightIndexBegin = -1, lightIndexEnd = -1;
 };
 
 /**

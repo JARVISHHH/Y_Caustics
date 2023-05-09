@@ -36,8 +36,9 @@ private:
     RandomGenerator rng;
     Integrator m_integrator;
 
-    StylizedCaustics stylizedCaustics;
-    Plane plane;
+//    StylizedCaustics stylizedCaustics;
+    std::vector<StylizedCaustics> stylizedCausticsVector;
+    std::vector<Plane> planeVector;
 
     void generatePhotons(const Scene& scene);
     void setIntegrator();
