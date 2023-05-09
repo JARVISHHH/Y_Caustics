@@ -21,6 +21,8 @@ public:
     void project(const Scene& scene, const std::vector<Photon> photons, Plane& plane);
     void assign(std::vector<Eigen::Vector2f>& images);
     void refine(std::vector<Eigen::Vector2f> I);
+    void refine_random(std::vector<Eigen::Vector2f> I);
+    void refine_bidirectional(std::vector<Eigen::Vector2f> I);
     std::vector<Eigen::Vector2f> move(float t = 0);
     void backProject(const Scene& scene, PhotonMap& pmap_caustic, Plane& plane, std::vector<Eigen::Vector2f>& currentPos);
 
@@ -53,6 +55,7 @@ private:
 
     int m;  // Total number of points
     int n;  // Number of points in subsets
+
     std::vector<Eigen::Vector2f> sources;  // Points of source caustics A
     std::vector<Eigen::Vector2f> targets;  // Points of target image B
     std::vector<int> subsetSourcesIndex;  // Index of chosen points

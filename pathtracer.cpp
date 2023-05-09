@@ -113,6 +113,8 @@ PathTracer::PathTracer(Scene *scene,
                 // or make the stylizedCaustics a parameter of the function
                 // To show the final result, go to move() function in stylizedcaustics.cpp, uncomment the final results code, and comment the results after tps
                 stylizedCaustics.refine(stylizedCaustics.tpsResults);
+//                stylizedCaustics.refine_random(stylizedCaustics.tpsResults);
+//                stylizedCaustics.refine_bidirectional(stylizedCaustics.tpsResults);
             }
         }
     }
