@@ -14,7 +14,7 @@
 using namespace Eigen;
 
 bool doStylizedCaustics = true;
-bool useGreedyMethod = false;
+bool useGreedyMethod = true;
 
 extern int maxPhotonsNum;
 
