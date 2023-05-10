@@ -3,7 +3,14 @@
 #include "util/random.h"
 
 void PhotonMapping::generatePhotonMap(PhotonMap &pmap, const Scene &scene, bool isCaustic) {
-//    std::cout << scene.getEmissives().size() << std::endl;
+    std::cout << "num_lights = "<<scene.getEmissives().size() << std::endl;
+    for (int i = 0; i < scene.getEmissives().size(); ++i) {
+        Eigen::Vector3<Eigen::Vector3f> vertices = scene.getEmissives()[i]->getVertices();
+        std::cout << "light " << i << std::endl;
+        std::cout << vertices(0) << std::endl;
+        std::cout << vertices(1) << std::endl;
+        std::cout << vertices(2) << std::endl;
+    }
     for (int i = 0; i < scene.getEmissives().size(); ++i) {
         auto light = scene.getEmissives()[i];
         size_t pmapSize = pmap.photons.size();

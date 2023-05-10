@@ -1,8 +1,8 @@
 <scenefile>
 	<cameradata>
-		<pos x="0" y="3" z="8"/>
-		<up x="0" y="1" z="0"/>
-		<focus x="0" y="0" z="0"/>
+		<pos x="0" y="12" z="2"/>
+		<up x="0" y="0" z="-1"/>
+		<focus x="0" y="0" z="2"/>
 		<heightangle v="45"/>
 	</cameradata>
 
@@ -10,29 +10,39 @@
 		<transblock>
 			<translate x="0" y="0" z="0"/>
                         <rotate x="0" y="0" z="1" angle="0"/>
-			<object type="primitive" name="mesh" filename="models/Caustics/sphere_stair">
+			<object type="primitive" name="mesh" filename="models/Caustics/sphere-3-lights">
 			</object>	
 		</transblock>
 	</object>
 
 	<stylized>
 		<parameters>
-			<image filename ="example-scenes/images/frog.png"/>
+			<image filename ="example-scenes/images/cit.png"/>
 			<size x="3" y="3"/>
-			<rotate angle="0"/>
-			<center x="0" y="0" z="3"/>
+			<rotate angle="-60"/>
+			<center x="-2.5" y="0" z="1"/>
 			<normal x="0" y="1" z="0"/>
 			<light indexBegin="0" indexEnd="1"/>
 		</parameters>
 
 		<parameters>
-			<image filename ="example-scenes/images/cloud.png"/>
+			<image filename ="example-scenes/images/scili.png"/>
 			<size x="3" y="3"/>
 			<rotate angle="60"/>
 			<center x="2.5" y="0" z="1"/>
 			<normal x="0" y="1" z="0"/>
 			<light indexBegin="2" indexEnd="3"/>
 		</parameters>
+
+		<parameters>
+			<image filename ="example-scenes/images/brown.png"/>
+			<size x="3" y="3"/>
+			<rotate angle="0"/>
+			<center x="0" y="0" z="3"/>
+			<normal x="0" y="1" z="0"/>
+			<light indexBegin="4" indexEnd="5"/>
+		</parameters>
+		
 	</stylized>
 
 </scenefile>
