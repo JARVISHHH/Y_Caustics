@@ -53,7 +53,7 @@ PathTracer::PathTracer(Scene *scene,
                 auto imageSamples = stylizedCaustics.sample(imageParameter->caustic_img);
                 // Set plane
                 std::cout << "index end: " << imageParameter->lightIndexEnd << std::endl;
-                planeVector[i] = Plane(imageParameter->img_rotate, imageParameter->img_center, imageParameter->img_normal);
+                planeVector[i] = Plane(imageParameter->img_rotate, imageParameter->img_center, imageParameter->img_normal.normalized());
                 auto& plane = planeVector[i];
                 std::cout << "created plane" << std::endl;
                 // Projection
@@ -154,7 +154,7 @@ void PathTracer::traceScene(QRgb *imageData, const Scene& scene,float max_dist, 
 
 void PathTracer::generatePhotons(const Scene& scene) {
     std::cout << "start generate" << std::endl;
-    pmap_r.maxPhotonNum = 50000;
+    pmap_r.maxPhotonNum = 60000;
     photonmapper.generatePhotonMap(pmap_r, scene);
     std::cout << "finish first generate" << std::endl;
     pmap_r.balance();
